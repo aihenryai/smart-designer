@@ -9,9 +9,6 @@ export const fileToBase64 = (file: File | Blob): Promise<string> => {
   });
 };
 
-/**
- * Splits a standard Base64 string (data:image/png;base64,...) into mimeType and data parts.
- */
 export const extractBase64Data = (fullBase64: string): [string, string] => {
   const parts = fullBase64.split(',');
   const mime = parts[0]?.match(/:(.*?);/)?.[1] || "image/png";

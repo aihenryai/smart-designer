@@ -1,10 +1,10 @@
 
 export interface ReferenceAttachment {
   id: string;
-  fileBase64: string; // The file data
-  mimeType: string;   // image/png, text/plain, etc.
+  fileBase64: string;
+  mimeType: string;
   fileName: string;
-  userInstruction: string; // "Use this for color palette", "Use structure", etc.
+  userInstruction: string;
 }
 
 export interface DesignBrief {
