@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { GoogleGenAI, Type, GenerateContentResponse } from "@google/genai";
+import { GoogleGenAI, Type } from "@google/genai";
 
 async function callWithTimeout<T>(
   promise: Promise<T>,
@@ -10,12 +10,6 @@ async function callWithTimeout<T>(
     setTimeout(() => reject(new Error(timeoutMessage)), timeoutMs)
   );
   return Promise.race([promise, timeoutPromise]);
-}
-
-function extractBase64Data(dataUrl: string): [string, string] {
-  const match = dataUrl.match(/^data:([^;]+);base64,(.+)$/);
-  if (!match) return ['', ''];
-  return [match[1], match[2]];
 }
 
 export default async function handler(
@@ -100,7 +94,7 @@ export default async function handler(
       }
     };
 
-    const response = await callWithTimeout<GenerateContentResponse>(
+    const response = await callWithTimeout(
       ai.models.generateContent({
         model: TEXT_MODEL,
         contents: { parts: [{ text: prompt }] },
@@ -130,7 +124,7 @@ export default async function handler(
     const conceptsWithImages = await Promise.all(
       textConcepts.map(async (concept: any) => {
         try {
-          const imgResponse = await callWithTimeout<GenerateContentResponse>(
+          const imgResponse = await callWithTimeout(
             ai.models.generateImages({
               model: IMAGE_MODEL,
               prompt: concept.imageGenerationPrompt,
@@ -143,8 +137,9 @@ export default async function handler(
             "Image generation timed out"
           );
 
-          if (imgResponse.generatedImages && imgResponse.generatedImages.length > 0) {
-            const img = imgResponse.generatedImages[0];
+          const generatedImages = (imgResponse as any).generatedImages;
+          if (generatedImages && generatedImages.length > 0) {
+            const img = generatedImages[0];
             if (img.image?.imageBytes) {
               concept.imageUrl = `data:image/png;base64,${img.image.imageBytes}`;
             }
