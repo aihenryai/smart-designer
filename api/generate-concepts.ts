@@ -47,8 +47,8 @@ export default async function handler(
 
     const ai = new GoogleGenAI({ apiKey: API_KEY });
     const TEXT_MODEL = "gemini-2.5-flash";
-    // Gemini 2.5 Flash Image (Nano Banana) - correct model name for image generation
-    const IMAGE_MODEL = "gemini-2.5-flash-image";
+    // Nano Banana Pro - best for Hebrew text rendering!
+    const IMAGE_MODEL = "gemini-3-pro-image-preview";
 
     const attachmentsInfo = (brief.attachments || []).map((att: any, idx: number) => 
       `Attachment ${idx + 1} (${att.fileName}): ${att.userInstruction}`
@@ -125,7 +125,7 @@ export default async function handler(
     const conceptsWithImages = await Promise.all(
       textConcepts.map(async (concept: any) => {
         try {
-          // Using Gemini 2.5 Flash Image (Nano Banana) for image generation
+          // Using Nano Banana Pro for superior Hebrew text rendering
           const imgResponse = await callWithTimeout(
             ai.models.generateContent({
               model: IMAGE_MODEL,
@@ -138,7 +138,7 @@ export default async function handler(
                 responseModalities: ["IMAGE", "TEXT"],
               }
             }),
-            120000,
+            180000, // Longer timeout for Pro model
             "Image generation timed out"
           );
 
