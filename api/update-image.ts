@@ -47,7 +47,7 @@ export default async function handler(
 
     const ai = new GoogleGenAI({ apiKey: API_KEY });
     const TEXT_MODEL = "gemini-2.5-flash";
-    const IMAGE_MODEL = "imagen-3.0-generate-002";
+    const IMAGE_MODEL = "imagen-4.0-generate-001";
 
     const rewritePrompt = `
       Act as an Expert Prompt Engineer.
