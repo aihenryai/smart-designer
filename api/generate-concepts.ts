@@ -46,7 +46,7 @@ export default async function handler(
     }
 
     const ai = new GoogleGenAI({ apiKey: API_KEY });
-    const TEXT_MODEL = "gemini-2.5-flash-preview-05-20";
+    const TEXT_MODEL = "gemini-2.5-flash";
     const IMAGE_MODEL = "imagen-3.0-generate-002";
 
     const attachmentsInfo = (brief.attachments || []).map((att: any, idx: number) => 
