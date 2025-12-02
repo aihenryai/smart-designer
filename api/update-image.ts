@@ -47,8 +47,8 @@ export default async function handler(
 
     const ai = new GoogleGenAI({ apiKey: API_KEY });
     const TEXT_MODEL = "gemini-2.5-flash";
-    // Nano Banana Pro - best for Hebrew text in images!
-    const IMAGE_MODEL = "gemini-3-pro-image-preview";
+    // Gemini 3 Pro Image - best for Hebrew text in images!
+    const IMAGE_MODEL = "gemini-3-pro-image";
 
     const rewritePrompt = `
       Act as an Expert Prompt Engineer.
@@ -80,7 +80,7 @@ export default async function handler(
 
     const timeout = edits.imageSize === "4K" ? 180000 : 120000;
 
-    // Using Nano Banana Pro (gemini-3-pro-image-preview) for superior Hebrew text rendering
+    // Using Gemini 3 Pro Image for superior Hebrew text rendering
     const imgResponse = await callWithTimeout(
       ai.models.generateContent({
         model: IMAGE_MODEL,
@@ -99,7 +99,7 @@ export default async function handler(
 
     let imageUrl = "";
     
-    // Parse Nano Banana Pro response - look for inlineData in parts
+    // Parse Gemini 3 Pro Image response - look for inlineData in parts
     const candidates = (imgResponse as any).candidates;
     if (candidates && candidates[0]?.content?.parts) {
       for (const part of candidates[0].content.parts) {
