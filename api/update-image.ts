@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { GoogleGenAI, GenerateContentResponse } from "@google/genai";
+import { GoogleGenAI } from "@google/genai";
 
 async function callWithTimeout<T>(
   promise: Promise<T>,
@@ -10,12 +10,6 @@ async function callWithTimeout<T>(
     setTimeout(() => reject(new Error(timeoutMessage)), timeoutMs)
   );
   return Promise.race([promise, timeoutPromise]);
-}
-
-function extractBase64Data(dataUrl: string): [string, string] {
-  const match = dataUrl.match(/^data:([^;]+);base64,(.+)$/);
-  if (!match) return ['', ''];
-  return [match[1], match[2]];
 }
 
 export default async function handler(
@@ -85,7 +79,7 @@ export default async function handler(
 
     const timeout = edits.imageSize === "4K" ? 180000 : 120000;
 
-    const imgResponse = await callWithTimeout<GenerateContentResponse>(
+    const imgResponse = await callWithTimeout(
       ai.models.generateImages({
         model: IMAGE_MODEL,
         prompt: newPrompt,
@@ -99,8 +93,9 @@ export default async function handler(
     );
 
     let imageUrl = "";
-    if (imgResponse.generatedImages && imgResponse.generatedImages.length > 0) {
-      const img = imgResponse.generatedImages[0];
+    const generatedImages = (imgResponse as any).generatedImages;
+    if (generatedImages && generatedImages.length > 0) {
+      const img = generatedImages[0];
       if (img.image?.imageBytes) {
         imageUrl = `data:image/png;base64,${img.image.imageBytes}`;
       }
