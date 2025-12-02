@@ -47,7 +47,8 @@ export default async function handler(
 
     const ai = new GoogleGenAI({ apiKey: API_KEY });
     const TEXT_MODEL = "gemini-2.5-flash";
-    const IMAGE_MODEL = "imagen-4.0-generate-001";
+    // Nano Banana Pro - best for Hebrew text in images!
+    const IMAGE_MODEL = "gemini-3-pro-image-preview";
 
     const attachmentsInfo = (brief.attachments || []).map((att: any, idx: number) => 
       `Attachment ${idx + 1} (${att.fileName}): ${att.userInstruction}`
@@ -124,24 +125,33 @@ export default async function handler(
     const conceptsWithImages = await Promise.all(
       textConcepts.map(async (concept: any) => {
         try {
+          // Using Nano Banana Pro (gemini-3-pro-image-preview) for superior Hebrew text rendering
           const imgResponse = await callWithTimeout(
-            ai.models.generateImages({
+            ai.models.generateContent({
               model: IMAGE_MODEL,
-              prompt: concept.imageGenerationPrompt,
+              contents: { 
+                parts: [{ 
+                  text: `Generate an image: ${concept.imageGenerationPrompt}. Aspect ratio: ${targetRatio}. Make sure any Hebrew text is rendered clearly and accurately.` 
+                }] 
+              },
               config: {
-                numberOfImages: 1,
-                aspectRatio: targetRatio
+                responseModalities: ["IMAGE", "TEXT"],
               }
             }),
             120000,
             "Image generation timed out"
           );
 
-          const generatedImages = (imgResponse as any).generatedImages;
-          if (generatedImages && generatedImages.length > 0) {
-            const img = generatedImages[0];
-            if (img.image?.imageBytes) {
-              concept.imageUrl = `data:image/png;base64,${img.image.imageBytes}`;
+          // Parse Nano Banana Pro response - look for inlineData in parts
+          const candidates = (imgResponse as any).candidates;
+          if (candidates && candidates[0]?.content?.parts) {
+            for (const part of candidates[0].content.parts) {
+              if (part.inlineData) {
+                const imageData = part.inlineData.data;
+                const mimeType = part.inlineData.mimeType || 'image/png';
+                concept.imageUrl = `data:${mimeType};base64,${imageData}`;
+                break;
+              }
             }
           }
 
