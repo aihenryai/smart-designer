@@ -1,5 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { GoogleGenAI, Type } from "@google/genai";
+import { verifyAuth, checkCredits, useCredit, sendAuthError, sendCreditsError } from './lib/auth-middleware';
 
 async function callWithTimeout<T>(
   promise: Promise<T>,
@@ -21,7 +22,7 @@ export default async function handler(
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
   res.setHeader(
     'Access-Control-Allow-Headers',
-    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
+    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization'
   );
 
   if (req.method === 'OPTIONS') {
@@ -34,6 +35,18 @@ export default async function handler(
   }
 
   try {
+    // Verify authentication
+    const user = await verifyAuth(req);
+    if (!user) {
+      return sendAuthError(res);
+    }
+
+    // Check credits
+    const creditsStatus = await checkCredits(user.uid);
+    if (!creditsStatus.hasCredits) {
+      return sendCreditsError(res, creditsStatus.remaining);
+    }
+
     const { brief } = req.body;
 
     if (!brief) {
@@ -163,7 +176,16 @@ export default async function handler(
       })
     );
 
-    return res.status(200).json({ concepts: conceptsWithImages });
+    // Use one credit after successful generation
+    const creditUsed = await useCredit(user.uid);
+    if (!creditUsed) {
+      console.warn('Failed to decrement credit for user:', user.uid);
+    }
+
+    return res.status(200).json({ 
+      concepts: conceptsWithImages,
+      creditsRemaining: creditsStatus.remaining - 1 // Return updated count
+    });
 
   } catch (error: any) {
     console.error('Generate concepts error:', error);
