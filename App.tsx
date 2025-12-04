@@ -1,16 +1,12 @@
 import React, { useState } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
-import { useAuth } from './contexts/AuthContext';
-import SignIn from './pages/SignIn';
-import ProtectedRoute from './components/ProtectedRoute';
-import UserMenu from './components/UserMenu';
 import BriefForm from './components/BriefForm';
 import ResultsView from './components/ResultsView';
 import EditorView from './components/EditorView';
+import UserMenu from './components/UserMenu';
 import { DesignBrief, AIConcept, AppState } from './types';
 import { analyzeBriefAndGenerateConcepts } from './services/gemini';
 
-const MainApp: React.FC = () => {
+const App: React.FC = () => {
   const [appState, setAppState] = useState<AppState>(AppState.FORM);
   const [briefData, setBriefData] = useState<DesignBrief | null>(null);
   const [concepts, setConcepts] = useState<AIConcept[]>([]);
@@ -154,42 +150,6 @@ const MainApp: React.FC = () => {
         )}
       </main>
     </div>
-  );
-};
-
-const App: React.FC = () => {
-  const { loading } = useAuth();
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#020617]">
-        <div className="text-center">
-          <div className="relative mb-12">
-            <div className="w-28 h-28 rounded-full border border-white/5 flex items-center justify-center relative bg-slate-900/50 backdrop-blur-sm">
-              <div className="absolute inset-0 border-t-2 border-r-2 border-fuchsia-500 rounded-full animate-spin"></div>
-              <div className="absolute inset-2 border-b-2 border-l-2 border-violet-500 rounded-full animate-spin reverse duration-[1.5s]"></div>
-              <div className="w-20 h-20 bg-gradient-to-tr from-violet-600 to-fuchsia-600 rounded-full blur-2xl animate-pulse opacity-50"></div>
-            </div>
-          </div>
-          <p className="text-slate-400 animate-pulse">טוען...</p>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <Routes>
-      <Route path="/signin" element={<SignIn />} />
-      <Route 
-        path="/" 
-        element={
-          <ProtectedRoute>
-            <MainApp />
-          </ProtectedRoute>
-        } 
-      />
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
   );
 };
 
