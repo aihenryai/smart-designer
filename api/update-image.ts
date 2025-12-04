@@ -1,5 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { GoogleGenAI } from "@google/genai";
+import { verifyAuth, sendAuthError } from './lib/auth-middleware';
 
 async function callWithTimeout<T>(
   promise: Promise<T>,
@@ -21,7 +22,7 @@ export default async function handler(
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
   res.setHeader(
     'Access-Control-Allow-Headers',
-    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
+    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization'
   );
 
   if (req.method === 'OPTIONS') {
@@ -34,6 +35,12 @@ export default async function handler(
   }
 
   try {
+    // Verify authentication
+    const user = await verifyAuth(req);
+    if (!user) {
+      return sendAuthError(res);
+    }
+
     const { concept, edits, attachments } = req.body;
 
     if (!concept || !edits) {
