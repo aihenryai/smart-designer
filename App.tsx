@@ -3,8 +3,10 @@ import BriefForm from './components/BriefForm';
 import ResultsView from './components/ResultsView';
 import EditorView from './components/EditorView';
 import UserMenu from './components/UserMenu';
+import UpgradePrompt from './components/UpgradePrompt';
 import { DesignBrief, AIConcept, AppState } from './types';
-import { analyzeBriefAndGenerateConcepts } from './services/gemini';
+import { generateConcepts } from './services/api';
+import { useAuth } from './contexts/AuthContext';
 
 const App: React.FC = () => {
   const [appState, setAppState] = useState<AppState>(AppState.FORM);
@@ -12,6 +14,9 @@ const App: React.FC = () => {
   const [concepts, setConcepts] = useState<AIConcept[]>([]);
   const [selectedConcept, setSelectedConcept] = useState<AIConcept | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
+  
+  const { userCredits, refreshCredits } = useAuth();
 
   const handleBriefSubmit = async (brief: DesignBrief) => {
     setBriefData(brief);
@@ -20,24 +25,32 @@ const App: React.FC = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
     try {
-      const conceptsPromise = analyzeBriefAndGenerateConcepts(brief);
+      const result = await generateConcepts(brief);
       
-      const timeoutPromise = new Promise<never>((_, reject) => 
-        setTimeout(() => reject(new Error("הפעולה נמשכת זמן רב מהצפוי. אנא נסה שוב.")), 300000)
-      );
-
-      const generatedConcepts = await Promise.race([conceptsPromise, timeoutPromise]);
-      
-      if (!generatedConcepts || generatedConcepts.length === 0) {
+      if (!result.concepts || result.concepts.length === 0) {
         throw new Error("לא נוצרו קונספטים. אנא נסה שנית.");
       }
 
-      setConcepts(generatedConcepts);
+      setConcepts(result.concepts);
       setAppState(AppState.RESULTS);
+      
+      // Refresh credits after successful generation
+      await refreshCredits();
+      
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err: any) {
       console.error("Submission error:", err);
-      setError(err.message || "אירעה שגיאה בתהליך היצירה. אנא נסה שנית.");
+      
+      // Check if it's a credits error
+      if (err.message.includes('קרדיטים') || err.message.includes('אין מספיק')) {
+        setShowUpgradePrompt(true);
+        setError("נגמרו הקרדיטים החינמיים שלך. שדרג לפרימיום כדי להמשיך ליצור!");
+      } else if (err.message.includes('התחברות')) {
+        setError("נדרשת התחברות למערכת. אנא התחבר ונסה שוב.");
+      } else {
+        setError(err.message || "אירעה שגיאה בתהליך היצירה. אנא נסה שנית.");
+      }
+      
       setAppState(AppState.FORM);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -65,6 +78,12 @@ const App: React.FC = () => {
   const handleBackToResults = () => {
     setSelectedConcept(null);
     setAppState(AppState.RESULTS);
+  };
+
+  const getRemainingCredits = () => {
+    if (!userCredits) return 0;
+    if (userCredits.plan === 'premium') return -1;
+    return Math.max(0, userCredits.credits.limit - userCredits.credits.used);
   };
 
   return (
@@ -149,6 +168,13 @@ const App: React.FC = () => {
           />
         )}
       </main>
+
+      {/* Upgrade Prompt Modal */}
+      <UpgradePrompt
+        isOpen={showUpgradePrompt}
+        onClose={() => setShowUpgradePrompt(false)}
+        remainingCredits={getRemainingCredits()}
+      />
     </div>
   );
 };
