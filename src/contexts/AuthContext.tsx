@@ -48,6 +48,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setUserCredits(credits);
       } catch (error) {
         console.error('Failed to load user credits:', error);
+        // Set default credits if Firestore fails
+        setUserCredits({
+          uid: currentUser.uid,
+          email: currentUser.email || '',
+          plan: 'free',
+          credits: {
+            used: 0,
+            limit: 3,
+            resetDate: null
+          },
+          createdAt: new Date(),
+          updatedAt: new Date()
+        });
       }
     } else {
       setUserCredits(null);
@@ -67,9 +80,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const signInWithGoogle = async () => {
     try {
       const result = await signInWithPopup(auth, googleProvider);
-      // Initialize credits for new users
+      // Try to initialize credits for new users, but don't fail if Firestore is not available
       if (result.user.email) {
-        await initializeUserCredits(result.user.uid, result.user.email);
+        try {
+          await initializeUserCredits(result.user.uid, result.user.email);
+        } catch (error) {
+          console.warn('Could not initialize Firestore credits, using defaults:', error);
+        }
         await loadUserCredits(result.user);
       }
     } catch (error: any) {
@@ -91,8 +108,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const signUpWithEmail = async (email: string, password: string) => {
     try {
       const result = await createUserWithEmailAndPassword(auth, email, password);
-      // Initialize credits for new users
-      await initializeUserCredits(result.user.uid, email);
+      // Try to initialize credits for new users, but don't fail if Firestore is not available
+      try {
+        await initializeUserCredits(result.user.uid, email);
+      } catch (error) {
+        console.warn('Could not initialize Firestore credits, using defaults:', error);
+      }
       await loadUserCredits(result.user);
     } catch (error: any) {
       console.error('Email sign up error:', error);
