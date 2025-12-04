@@ -8,14 +8,17 @@ import {
   createUserWithEmailAndPassword
 } from 'firebase/auth';
 import { auth, googleProvider } from '../config/firebase';
+import { initializeUserCredits, getUserCredits, UserCredits } from '../services/credits';
 
 interface AuthContextType {
   user: User | null;
+  userCredits: UserCredits | null;
   loading: boolean;
   signInWithGoogle: () => Promise<void>;
   signInWithEmail: (email: string, password: string) => Promise<void>;
   signUpWithEmail: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
+  refreshCredits: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -34,11 +37,27 @@ interface AuthProviderProps {
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [userCredits, setUserCredits] = useState<UserCredits | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Load user credits when user changes
+  const loadUserCredits = async (currentUser: User | null) => {
+    if (currentUser) {
+      try {
+        const credits = await getUserCredits(currentUser.uid);
+        setUserCredits(credits);
+      } catch (error) {
+        console.error('Failed to load user credits:', error);
+      }
+    } else {
+      setUserCredits(null);
+    }
+  };
+
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setUser(user);
+      await loadUserCredits(user);
       setLoading(false);
     });
 
@@ -47,7 +66,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const signInWithGoogle = async () => {
     try {
-      await signInWithPopup(auth, googleProvider);
+      const result = await signInWithPopup(auth, googleProvider);
+      // Initialize credits for new users
+      if (result.user.email) {
+        await initializeUserCredits(result.user.uid, result.user.email);
+        await loadUserCredits(result.user);
+      }
     } catch (error: any) {
       console.error('Google sign in error:', error);
       throw new Error(getHebrewErrorMessage(error.code));
@@ -56,7 +80,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const signInWithEmail = async (email: string, password: string) => {
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const result = await signInWithEmailAndPassword(auth, email, password);
+      await loadUserCredits(result.user);
     } catch (error: any) {
       console.error('Email sign in error:', error);
       throw new Error(getHebrewErrorMessage(error.code));
@@ -65,7 +90,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const signUpWithEmail = async (email: string, password: string) => {
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
+      const result = await createUserWithEmailAndPassword(auth, email, password);
+      // Initialize credits for new users
+      await initializeUserCredits(result.user.uid, email);
+      await loadUserCredits(result.user);
     } catch (error: any) {
       console.error('Email sign up error:', error);
       throw new Error(getHebrewErrorMessage(error.code));
@@ -75,19 +103,28 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const signOut = async () => {
     try {
       await firebaseSignOut(auth);
+      setUserCredits(null);
     } catch (error: any) {
       console.error('Sign out error:', error);
       throw new Error('שגיאה בניתוק. אנא נסה שוב.');
     }
   };
 
+  const refreshCredits = async () => {
+    if (user) {
+      await loadUserCredits(user);
+    }
+  };
+
   const value: AuthContextType = {
     user,
+    userCredits,
     loading,
     signInWithGoogle,
     signInWithEmail,
     signUpWithEmail,
-    signOut
+    signOut,
+    refreshCredits
   };
 
   return (
