@@ -3,103 +3,161 @@ import React from 'react';
 interface UpgradePromptProps {
   isOpen: boolean;
   onClose: () => void;
-  remainingCredits?: number;
+  remainingCredits: number;
 }
 
-const UpgradePrompt: React.FC<UpgradePromptProps> = ({ isOpen, onClose, remainingCredits = 0 }) => {
+const UpgradePrompt: React.FC<UpgradePromptProps> = ({ isOpen, onClose, remainingCredits }) => {
   if (!isOpen) return null;
 
   const handleUpgrade = () => {
-    // TODO: Integrate with Stripe payment
-    console.log('Upgrade to premium clicked');
-    alert('מערכת התשלום תשולב בקרוב! 🚀');
+    alert('מערכת התשלום תשולב בקרוב! נא ליצור קשר עם התמיכה.');
+    onClose();
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl max-w-2xl w-full p-8 relative shadow-2xl">
-        {/* Close button */}
-        <button
-          onClick={onClose}
-          className="absolute top-4 left-4 text-gray-400 hover:text-gray-600 transition-colors"
+    <>
+      <div 
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 animate-fadeIn"
+        onClick={onClose}
+      />
+      
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
+        <div 
+          className="bg-slate-900/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl max-w-lg w-full p-8 pointer-events-auto animate-scaleIn relative overflow-hidden"
+          onClick={(e) => e.stopPropagation()}
         >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-
-        {/* Header */}
-        <div className="text-center mb-6">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-600 rounded-full mb-4">
-            <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-            </svg>
-          </div>
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">
-            {remainingCredits === 0 ? 'נגמרו הקרדיטים שלך!' : 'שדרג לפרימיום'}
-          </h2>
-          <p className="text-gray-600">
-            {remainingCredits === 0 
-              ? 'השתמשת בכל 3 היצירות החינמיות. שדרג עכשיו וקבל גישה בלתי מוגבלת!'
-              : `נותרו לך עוד ${remainingCredits} יצירות חינמיות. קבל גישה בלתי מוגבלת עכשיו!`
-            }
-          </p>
-        </div>
-
-        {/* Pricing card */}
-        <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl p-6 mb-6 border-2 border-purple-200">
-          <div className="flex items-baseline justify-between mb-4">
-            <div>
-              <span className="text-4xl font-bold text-gray-900">₪39</span>
-              <span className="text-gray-600 mr-2">/חודש</span>
-            </div>
-            <span className="bg-purple-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
-              מומלץ ביותר
-            </span>
-          </div>
-
-          {/* Features */}
-          <div className="space-y-3">
-            {[
-              'יצירות בלתי מוגבלות',
-              'עריכה מלאה של כל קונספט',
-              'עדכוני תמונות בלתי מוגבלים',
-              'הורדה ברזולוציה גבוהה',
-              'גישה מוקדמת לפיצ׳רים חדשים',
-              'תמיכה טכנית מועדפת'
-            ].map((feature, index) => (
-              <div key={index} className="flex items-center gap-3">
-                <svg className="w-5 h-5 text-green-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                </svg>
-                <span className="text-gray-700">{feature}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* CTA buttons */}
-        <div className="space-y-3">
-          <button
-            onClick={handleUpgrade}
-            className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white font-semibold py-4 rounded-xl hover:from-purple-700 hover:to-blue-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
-          >
-            שדרג עכשיו לפרימיום 🚀
-          </button>
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-violet-600 via-fuchsia-500 to-orange-500"></div>
+          
           <button
             onClick={onClose}
-            className="w-full text-gray-600 font-medium py-3 rounded-xl hover:bg-gray-100 transition-colors"
+            className="absolute top-4 left-4 text-slate-400 hover:text-white transition-colors"
+            aria-label="סגור"
           >
-            {remainingCredits > 0 ? 'אמשיך עם התוכנית החינמית' : 'אולי מאוחר יותר'}
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
           </button>
-        </div>
 
-        {/* Trust badge */}
-        <div className="mt-6 text-center text-sm text-gray-500">
-          <p>✓ ביטול בכל עת ✓ תשלום מאובטח ✓ החזר כספי תוך 14 יום</p>
+          <div className="text-center mt-4">
+            <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-gradient-to-br from-violet-600 via-fuchsia-500 to-orange-500 flex items-center justify-center shadow-lg shadow-fuchsia-500/30">
+              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+            </div>
+
+            <h2 className="text-2xl font-bold text-white mb-3">שדרג לפרימיום</h2>
+
+            <p className="text-slate-300 mb-2 text-sm">
+              {remainingCredits === 0 
+                ? 'נגמרו הקרדיטים החינמיים שלך' 
+                : `נותרו לך ${remainingCredits} קרדיטים בלבד`
+              }
+            </p>
+            <p className="text-slate-400 text-sm mb-8">שדרג עכשיו וקבל גישה בלתי מוגבלת ליצירת עיצובים!</p>
+
+            <div className="bg-white/5 rounded-xl p-6 mb-8 text-right">
+              <h3 className="text-white font-semibold mb-4 text-center">מה תקבל בפרימיום?</h3>
+              <ul className="space-y-3">
+                <li className="flex items-start gap-3">
+                  <div className="w-5 h-5 rounded-full bg-gradient-to-br from-violet-600 to-fuchsia-600 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <span className="text-slate-300 text-sm">יצירות <strong className="text-white">בלתי מוגבלות</strong></span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <div className="w-5 h-5 rounded-full bg-gradient-to-br from-violet-600 to-fuchsia-600 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <span className="text-slate-300 text-sm">גישה לכל התבניות והסגנונות</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <div className="w-5 h-5 rounded-full bg-gradient-to-br from-violet-600 to-fuchsia-600 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <span className="text-slate-300 text-sm">תמיכה טכנית מהירה ומקצועית</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <div className="w-5 h-5 rounded-full bg-gradient-to-br from-violet-600 to-fuchsia-600 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <span className="text-slate-300 text-sm">הורדה באיכות גבוהה</span>
+                </li>
+              </ul>
+            </div>
+
+            <div className="bg-gradient-to-br from-violet-600/20 to-fuchsia-600/20 rounded-xl p-6 mb-6 border border-violet-500/30">
+              <div className="text-center">
+                <p className="text-slate-300 text-sm mb-2">החל מ-</p>
+                <div className="flex items-baseline justify-center gap-2">
+                  <span className="text-4xl font-bold text-white">₪49</span>
+                  <span className="text-slate-400 text-sm">לחודש</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={handleUpgrade}
+                className="w-full bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-700 hover:to-fuchsia-700 text-white font-bold py-4 px-6 rounded-xl transition-all shadow-lg hover:shadow-fuchsia-500/30 transform hover:scale-105"
+              >
+                שדרג עכשיו
+              </button>
+              <button
+                onClick={onClose}
+                className="w-full bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white font-medium py-3 px-6 rounded-xl transition-all border border-white/10"
+              >
+                אולי מאוחר יותר
+              </button>
+            </div>
+
+            <div className="mt-6 pt-6 border-t border-white/10">
+              <p className="text-slate-400 text-xs text-center">
+                יש שאלות? צור קשר: 
+                <a 
+                  href="https://wa.me/972585005171" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-fuchsia-400 hover:text-fuchsia-300 mr-1 transition-colors"
+                >
+                  0585005171
+                </a>
+              </p>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
+
+      <style>{`
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @keyframes scaleIn {
+          from { 
+            opacity: 0;
+            transform: scale(0.95);
+          }
+          to { 
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+        .animate-fadeIn {
+          animation: fadeIn 0.2s ease-out;
+        }
+        .animate-scaleIn {
+          animation: scaleIn 0.3s ease-out;
+        }
+      `}</style>
+    </>
   );
 };
 
