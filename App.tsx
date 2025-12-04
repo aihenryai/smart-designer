@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import BriefForm from './components/BriefForm';
-import ResultsView from './components/ResultsView';
-import EditorView from './components/EditorView';
-import UserMenu from './components/UserMenu';
-import UpgradePrompt from './components/UpgradePrompt';
+import BriefForm from './src/components/BriefForm';
+import ResultsView from './src/components/ResultsView';
+import EditorView from './src/components/EditorView';
+import UserMenu from './src/components/UserMenu';
+import UpgradePrompt from './src/components/UpgradePrompt';
 import { DesignBrief, AIConcept, AppState } from './types';
-import { generateConcepts } from './services/api';
-import { useAuth } from './contexts/AuthContext';
+import { generateConcepts } from './src/services/api';
+import { useAuth } from './src/contexts/AuthContext';
 
 const App: React.FC = () => {
   const [appState, setAppState] = useState<AppState>(AppState.FORM);
