@@ -1,13 +1,5 @@
-// src/config/firebase.ts
 import { initializeApp } from 'firebase/app';
-import { 
-  getAuth, 
-  GoogleAuthProvider, 
-  FacebookAuthProvider, 
-  OAuthProvider,
-  setPersistence,
-  browserLocalPersistence
-} from 'firebase/auth';
+import { getAuth } from 'firebase/auth';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -18,29 +10,5 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
-
-// Initialize Firebase Auth
 export const auth = getAuth(app);
-
-// Set persistence to LOCAL (stays logged in)
-setPersistence(auth, browserLocalPersistence);
-
-// Auth Providers
-export const googleProvider = new GoogleAuthProvider();
-googleProvider.setCustomParameters({
-  prompt: 'select_account'
-});
-
-export const facebookProvider = new FacebookAuthProvider();
-facebookProvider.setCustomParameters({
-  display: 'popup'
-});
-
-export const microsoftProvider = new OAuthProvider('microsoft.com');
-microsoftProvider.setCustomParameters({
-  prompt: 'select_account'
-});
-
-export default app;
