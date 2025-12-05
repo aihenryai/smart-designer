@@ -1,18 +1,24 @@
-import * as admin from 'firebase-admin';
+import * as adminImport from 'firebase-admin';
+
+// Handle ESM/CJS module differences
+const admin = (adminImport as any).default || adminImport;
 
 let isInitialized = false;
-let _adminAuth: admin.auth.Auth | null = null;
-let _adminDb: admin.firestore.Firestore | null = null;
+let _adminAuth: any = null;
+let _adminDb: any = null;
 let initError: string | null = null;
 
 // Safe initialization function
 function safeInitialize() {
-  if (admin.apps.length) {
+  const apps = admin.apps || [];
+  
+  if (apps.length > 0) {
     // Already initialized
     try {
       _adminAuth = admin.auth();
       _adminDb = admin.firestore();
       isInitialized = true;
+      console.log('Firebase Admin: Using existing app');
       return;
     } catch (error) {
       console.error('Failed to get auth/firestore from existing app:', error);
