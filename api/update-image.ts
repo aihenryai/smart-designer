@@ -54,24 +54,27 @@ export default async function handler(
 
     const ai = new GoogleGenAI({ apiKey: API_KEY });
     const TEXT_MODEL = "gemini-2.5-flash";
-    // Nano Banana Pro - best for Hebrew text in images!
-    const IMAGE_MODEL = "gemini-3-pro-image-preview";
+    // Use Imagen 4 for image generation
+    const IMAGE_MODEL = "imagen-4.0-fast-generate-001";
 
+    // Generate improved prompt based on edits
     const rewritePrompt = `
-      Act as an Expert Prompt Engineer.
+      Act as an Expert Prompt Engineer for image generation.
       ORIGINAL PROMPT: "${concept.imageGenerationPrompt}"
       
       USER REQUESTED CHANGES:
-      - New Headline Text (Hebrew): "${edits.newHeadline}"
+      - New Headline Text: "${edits.newHeadline}"
       - Visual Edits: "${edits.userInstructions}"
       
-      TASK: Rewrite the English prompt to incorporate these changes naturally.
+      TASK: Rewrite the prompt to incorporate these changes naturally.
       
-      CRITICAL REQUIREMENTS:
-      1. The prompt MUST explicitly instruct the image generator to render the specific Hebrew text "${edits.newHeadline}". 
-         Format: "...featuring the Hebrew text '${edits.newHeadline}' written in clear, bold typography...".
+      REQUIREMENTS:
+      1. Write only in English
+      2. Do not include any Hebrew text in the prompt itself
+      3. Focus on visual composition, colors, lighting, style
+      4. Describe where text elements would be placed (but don't include actual text)
       
-      OUTPUT: The new English prompt only.
+      OUTPUT: Only the new English prompt, nothing else.
     `;
 
     let newPrompt = concept.imageGenerationPrompt;
@@ -82,22 +85,29 @@ export default async function handler(
       });
       if (response.text) newPrompt = response.text.trim();
     } catch (e) {
-      newPrompt = `${concept.imageGenerationPrompt}. CHANGES: ${edits.userInstructions}. REQUIRED TEXT: "${edits.newHeadline}"`;
+      newPrompt = `${concept.imageGenerationPrompt}. Additional requirements: ${edits.userInstructions}`;
     }
+
+    // Determine aspect ratio
+    let aspectRatio: "1:1" | "3:4" | "4:3" | "9:16" | "16:9" = "3:4";
+    const ratioStr = edits.aspectRatio || "";
+    if (ratioStr.includes("1:1")) aspectRatio = "1:1";
+    else if (ratioStr.includes("9:16")) aspectRatio = "9:16";
+    else if (ratioStr.includes("16:9")) aspectRatio = "16:9";
+    else if (ratioStr.includes("4:3")) aspectRatio = "4:3";
+    else if (ratioStr.includes("3:4")) aspectRatio = "3:4";
 
     const timeout = edits.imageSize === "4K" ? 180000 : 120000;
 
-    // Using Nano Banana Pro for superior Hebrew text rendering
+    // Use generateImages API for Imagen model
     const imgResponse = await callWithTimeout(
-      ai.models.generateContent({
+      ai.models.generateImages({
         model: IMAGE_MODEL,
-        contents: { 
-          parts: [{ 
-            text: `Generate an image: ${newPrompt}. Aspect ratio: ${edits.aspectRatio || "3:4"}. Make sure any Hebrew text is rendered clearly and accurately.` 
-          }] 
-        },
+        prompt: newPrompt,
         config: {
-          responseModalities: ["IMAGE", "TEXT"],
+          numberOfImages: 1,
+          outputMimeType: 'image/png',
+          aspectRatio: aspectRatio,
         }
       }),
       timeout,
@@ -106,16 +116,11 @@ export default async function handler(
 
     let imageUrl = "";
     
-    // Parse Nano Banana Pro response - look for inlineData in parts
-    const candidates = (imgResponse as any).candidates;
-    if (candidates && candidates[0]?.content?.parts) {
-      for (const part of candidates[0].content.parts) {
-        if (part.inlineData) {
-          const imageData = part.inlineData.data;
-          const mimeType = part.inlineData.mimeType || 'image/png';
-          imageUrl = `data:${mimeType};base64,${imageData}`;
-          break;
-        }
+    // Extract image from response
+    if (imgResponse.generatedImages && imgResponse.generatedImages.length > 0) {
+      const imageData = imgResponse.generatedImages[0].image?.imageBytes;
+      if (imageData) {
+        imageUrl = `data:image/png;base64,${imageData}`;
       }
     }
 
