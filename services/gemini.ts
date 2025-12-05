@@ -1,25 +1,26 @@
 import { DesignBrief, AIConcept, ReferenceAttachment } from "../types";
+import { apiPost } from "./apiClient";
 
-const API_BASE = '/api';
+interface GenerateConceptsResponse {
+  concepts: AIConcept[];
+  creditsRemaining: number;
+}
+
+interface AutoFillResponse {
+  suggestion: string;
+}
+
+interface UpdateImageResponse {
+  imageUrl: string;
+  creditsRemaining?: number;
+}
 
 export const generateAutoFillSuggestion = async (
   targetField: string,
   context: { subject: string; instructions: string; essentialInfo: string }
 ): Promise<string> => {
   try {
-    const response = await fetch(`${API_BASE}/auto-fill`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ targetField, context })
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data = await response.json();
+    const data = await apiPost<AutoFillResponse>('/auto-fill', { targetField, context });
     return data.suggestion || "";
   } catch (error) {
     console.warn("Auto-fill failed:", error);
@@ -29,24 +30,11 @@ export const generateAutoFillSuggestion = async (
 
 export const analyzeBriefAndGenerateConcepts = async (brief: DesignBrief): Promise<AIConcept[]> => {
   try {
-    const response = await fetch(`${API_BASE}/generate-concepts`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ brief })
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || `HTTP error! status: ${response.status}`);
-    }
-
-    const data = await response.json();
+    const data = await apiPost<GenerateConceptsResponse>('/generate-concepts', { brief });
     return data.concepts || [];
   } catch (error: any) {
     console.error("Failed to generate concepts:", error);
-    throw new Error(`Failed to generate concepts: ${error.message}`);
+    throw new Error(error.message || `Failed to generate concepts`);
   }
 };
 
@@ -62,20 +50,7 @@ export const updateConceptImage = async (
   attachments: ReferenceAttachment[] = []
 ): Promise<string> => {
   try {
-    const response = await fetch(`${API_BASE}/update-image`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ concept, edits, attachments })
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || `HTTP error! status: ${response.status}`);
-    }
-
-    const data = await response.json();
+    const data = await apiPost<UpdateImageResponse>('/update-image', { concept, edits, attachments });
     
     if (!data.imageUrl) {
       throw new Error("Failed to regenerate image.");
@@ -84,6 +59,6 @@ export const updateConceptImage = async (
     return data.imageUrl;
   } catch (error: any) {
     console.error("Failed to update image:", error);
-    throw new Error(`Failed to update image: ${error.message}`);
+    throw new Error(error.message || `Failed to update image`);
   }
 };
