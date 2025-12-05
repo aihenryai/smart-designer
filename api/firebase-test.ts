@@ -15,12 +15,13 @@ export default async function handler(
     // Step 1: Try to import firebase-admin
     results.steps.push({ step: 'import', status: 'starting' });
     const admin = await import('firebase-admin');
-    results.steps.push({ step: 'import', status: 'success' });
+    results.steps.push({ step: 'import', status: 'success', keys: Object.keys(admin).slice(0, 10) });
     
-    // Step 2: Check if already initialized
-    results.steps.push({ step: 'check_apps', count: admin.apps.length });
+    // Step 2: Check apps array - handle potential undefined
+    const apps = admin.apps || admin.default?.apps || [];
+    results.steps.push({ step: 'check_apps', count: apps?.length || 0, appsType: typeof apps });
     
-    if (admin.apps.length > 0) {
+    if (apps && apps.length > 0) {
       results.steps.push({ step: 'already_initialized', status: 'true' });
       results.success = true;
       return res.status(200).json(results);
@@ -44,27 +45,31 @@ export default async function handler(
       client_email: serviceAccount.client_email
     });
     
-    // Step 4: Create credential
+    // Step 4: Get the correct admin reference
+    const adminModule = admin.default || admin;
+    results.steps.push({ step: 'get_admin_module', hasDefault: !!admin.default });
+    
+    // Step 5: Create credential
     results.steps.push({ step: 'create_credential', status: 'starting' });
-    const credential = admin.credential.cert(serviceAccount);
+    const credential = adminModule.credential.cert(serviceAccount);
     results.steps.push({ step: 'create_credential', status: 'success' });
     
-    // Step 5: Initialize app
+    // Step 6: Initialize app
     results.steps.push({ step: 'initialize_app', status: 'starting' });
-    admin.initializeApp({
+    adminModule.initializeApp({
       credential: credential,
       projectId: serviceAccount.project_id
     });
     results.steps.push({ step: 'initialize_app', status: 'success' });
     
-    // Step 6: Test auth
+    // Step 7: Test auth
     results.steps.push({ step: 'get_auth', status: 'starting' });
-    const auth = admin.auth();
+    const auth = adminModule.auth();
     results.steps.push({ step: 'get_auth', status: 'success' });
     
-    // Step 7: Test firestore
+    // Step 8: Test firestore
     results.steps.push({ step: 'get_firestore', status: 'starting' });
-    const db = admin.firestore();
+    const db = adminModule.firestore();
     results.steps.push({ step: 'get_firestore', status: 'success' });
     
     results.success = true;
