@@ -1,5 +1,4 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { checkFirebaseAdmin } from './lib/firebase-admin';
 
 export default async function handler(
   req: VercelRequest,
@@ -9,8 +8,14 @@ export default async function handler(
   
   const serviceAccountEnv = process.env.FIREBASE_SERVICE_ACCOUNT;
   
-  // Check Firebase Admin status (async)
-  const firebaseStatus = await checkFirebaseAdmin();
+  // Use dynamic import to avoid module-level crashes
+  let firebaseStatus = { ready: false, error: 'Not checked' };
+  try {
+    const firebaseAdmin = await import('./lib/firebase-admin');
+    firebaseStatus = await firebaseAdmin.checkFirebaseAdmin();
+  } catch (error: any) {
+    firebaseStatus = { ready: false, error: error.message };
+  }
   
   const status = {
     server: 'ok',
