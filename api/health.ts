@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { isFirebaseAdminReady, getInitError } from './lib/firebase-admin';
+import { checkFirebaseAdmin } from './lib/firebase-admin';
 
 export default async function handler(
   req: VercelRequest,
@@ -8,6 +8,9 @@ export default async function handler(
   res.setHeader('Access-Control-Allow-Origin', '*');
   
   const serviceAccountEnv = process.env.FIREBASE_SERVICE_ACCOUNT;
+  
+  // Check Firebase Admin status (async)
+  const firebaseStatus = await checkFirebaseAdmin();
   
   const status = {
     server: 'ok',
@@ -18,8 +21,8 @@ export default async function handler(
       serviceAccountLength: serviceAccountEnv?.length || 0,
       hasFirebaseProjectId: !!process.env.VITE_FIREBASE_PROJECT_ID,
       firebaseProjectId: process.env.VITE_FIREBASE_PROJECT_ID || 'not set',
-      firebaseAdminReady: isFirebaseAdminReady(),
-      firebaseInitError: getInitError()
+      firebaseAdminReady: firebaseStatus.ready,
+      firebaseInitError: firebaseStatus.error
     }
   };
 
