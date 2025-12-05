@@ -1,11 +1,15 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { adminAuth, getAdminDb } from './firebase-admin';
 
 export interface AuthenticatedRequest extends VercelRequest {
   user?: {
     uid: string;
     email: string | undefined;
   };
+}
+
+// Dynamic import helper
+async function getFirebaseAdmin() {
+  return await import('./firebase-admin');
 }
 
 /**
@@ -20,6 +24,7 @@ export async function verifyAuth(req: AuthenticatedRequest): Promise<{ uid: stri
     }
 
     const idToken = authHeader.split('Bearer ')[1];
+    const { adminAuth } = await getFirebaseAdmin();
     const decodedToken = await adminAuth.verifyIdToken(idToken);
     
     return {
@@ -37,6 +42,7 @@ export async function verifyAuth(req: AuthenticatedRequest): Promise<{ uid: stri
  */
 export async function checkCredits(uid: string): Promise<{ hasCredits: boolean; remaining: number; plan: string }> {
   try {
+    const { getAdminDb } = await getFirebaseAdmin();
     const db = await getAdminDb();
     const userRef = db.collection('users').doc(uid);
     const userDoc = await userRef.get();
@@ -100,6 +106,7 @@ export async function checkCredits(uid: string): Promise<{ hasCredits: boolean; 
  */
 export async function useCredit(uid: string): Promise<boolean> {
   try {
+    const { getAdminDb } = await getFirebaseAdmin();
     const db = await getAdminDb();
     const userRef = db.collection('users').doc(uid);
     const userDoc = await userRef.get();
