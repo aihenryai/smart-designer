@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { adminAuth, adminDb } from './firebase-admin';
+import { adminAuth, getAdminDb } from './firebase-admin';
 
 export interface AuthenticatedRequest extends VercelRequest {
   user?: {
@@ -37,7 +37,8 @@ export async function verifyAuth(req: AuthenticatedRequest): Promise<{ uid: stri
  */
 export async function checkCredits(uid: string): Promise<{ hasCredits: boolean; remaining: number; plan: string }> {
   try {
-    const userRef = adminDb.collection('users').doc(uid);
+    const db = await getAdminDb();
+    const userRef = db.collection('users').doc(uid);
     const userDoc = await userRef.get();
 
     if (!userDoc.exists) {
@@ -85,9 +86,10 @@ export async function checkCredits(uid: string): Promise<{ hasCredits: boolean; 
     };
   } catch (error) {
     console.error('Check credits error:', error);
+    // Return default free credits on error
     return {
-      hasCredits: false,
-      remaining: 0,
+      hasCredits: true,
+      remaining: 3,
       plan: 'free'
     };
   }
@@ -98,7 +100,8 @@ export async function checkCredits(uid: string): Promise<{ hasCredits: boolean; 
  */
 export async function useCredit(uid: string): Promise<boolean> {
   try {
-    const userRef = adminDb.collection('users').doc(uid);
+    const db = await getAdminDb();
+    const userRef = db.collection('users').doc(uid);
     const userDoc = await userRef.get();
 
     if (!userDoc.exists) {
