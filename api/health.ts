@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { isFirebaseAdminReady } from './lib/firebase-admin';
+import { isFirebaseAdminReady, getInitError } from './lib/firebase-admin';
 
 export default async function handler(
   req: VercelRequest,
@@ -7,14 +7,19 @@ export default async function handler(
 ) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   
+  const serviceAccountEnv = process.env.FIREBASE_SERVICE_ACCOUNT;
+  
   const status = {
     server: 'ok',
     timestamp: new Date().toISOString(),
     environment: {
       hasGeminiKey: !!process.env.GEMINI_API_KEY,
-      hasFirebaseServiceAccount: !!process.env.FIREBASE_SERVICE_ACCOUNT,
+      hasFirebaseServiceAccount: !!serviceAccountEnv,
+      serviceAccountLength: serviceAccountEnv?.length || 0,
       hasFirebaseProjectId: !!process.env.VITE_FIREBASE_PROJECT_ID,
-      firebaseAdminReady: isFirebaseAdminReady()
+      firebaseProjectId: process.env.VITE_FIREBASE_PROJECT_ID || 'not set',
+      firebaseAdminReady: isFirebaseAdminReady(),
+      firebaseInitError: getInitError()
     }
   };
 
