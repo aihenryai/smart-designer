@@ -4,6 +4,9 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './src/contexts/AuthContext';
 import App from './src/App';
 import SignIn from './src/pages/SignIn';
+import Pricing from './src/pages/Pricing';
+import PaymentSuccess from './src/pages/PaymentSuccess';
+import PaymentCancel from './src/pages/PaymentCancel';
 import ProtectedRoute from './src/components/ProtectedRoute';
 
 const rootElement = document.getElementById('root');
@@ -18,6 +21,30 @@ root.render(
       <AuthProvider>
         <Routes>
           <Route path="/signin" element={<SignIn />} />
+          <Route 
+            path="/pricing" 
+            element={
+              <ProtectedRoute>
+                <Pricing />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/payment/success" 
+            element={
+              <ProtectedRoute>
+                <PaymentSuccess />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/payment/cancel" 
+            element={
+              <ProtectedRoute>
+                <PaymentCancel />
+              </ProtectedRoute>
+            } 
+          />
           <Route 
             path="/" 
             element={
