@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { GoogleGenAI } from "@google/genai";
-import { verifyAuth, sendAuthError } from './lib/auth-middleware';
+import { verifyAuth, sendAuthError } from './lib/auth-middleware.js';
 
 async function callWithTimeout<T>(
   promise: Promise<T>,
