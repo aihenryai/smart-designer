@@ -1,6 +1,6 @@
 import React, { useState, ChangeEvent } from 'react';
 import { AIConcept, ReferenceAttachment } from '../../types';
-import { updateConceptImage } from '../services/gemini';
+import { updateConceptImage } from '../services/api';
 import { fileToBase64 } from '../../utils';
 import { jsPDF } from "jspdf";
 
@@ -25,6 +25,12 @@ const EditorView: React.FC<EditorViewProps> = ({ concept, initialEssentialInfo, 
   const [isProcessing, setIsProcessing] = useState(false);
   const [processLabel, setProcessLabel] = useState("");
   const [currentResolution, setCurrentResolution] = useState<"1K" | "2K" | "4K">("1K");
+  
+  // Keep track of the current concept with updated prompt for sequential edits
+  const [currentConcept, setCurrentConcept] = useState<AIConcept>(concept);
+  
+  // Track edit history for UI feedback
+  const [editHistory, setEditHistory] = useState<string[]>([]);
 
   const handleFileUpload = async (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -52,7 +58,7 @@ const EditorView: React.FC<EditorViewProps> = ({ concept, initialEssentialInfo, 
 
   const runGeneration = async (targetSize: "1K" | "2K" | "4K") => {
     try {
-      const newImageUrl = await updateConceptImage(concept, {
+      const result = await updateConceptImage(currentConcept, {
         newHeadline: headline,
         newEssentialInfo: essentialInfo,
         userInstructions: customRequest,
@@ -60,9 +66,25 @@ const EditorView: React.FC<EditorViewProps> = ({ concept, initialEssentialInfo, 
         imageSize: targetSize
       }, attachments);
       
-      setCurrentImageUrl(newImageUrl);
+      setCurrentImageUrl(result.imageUrl);
       setCurrentResolution(targetSize);
-      return newImageUrl;
+      
+      // Update the current concept with the new prompt for sequential edits
+      if (result.updatedPrompt) {
+        setCurrentConcept(prev => ({
+          ...prev,
+          imageGenerationPrompt: result.updatedPrompt,
+          imageUrl: result.imageUrl
+        }));
+      }
+      
+      // Add to edit history
+      if (customRequest.trim()) {
+        setEditHistory(prev => [...prev, customRequest]);
+        setCustomRequest(""); // Clear the custom request after successful edit
+      }
+      
+      return result.imageUrl;
     } catch (error) {
       console.error(error);
       alert("שגיאה ביצירת התמונה");
@@ -75,7 +97,7 @@ const EditorView: React.FC<EditorViewProps> = ({ concept, initialEssentialInfo, 
     setProcessLabel("מעבד שינויים...");
     try {
       const url = await runGeneration("1K");
-      onUpdate({ ...concept, headline, imageUrl: url });
+      onUpdate({ ...currentConcept, headline, imageUrl: url });
     } finally {
       setIsProcessing(false);
     }
@@ -126,8 +148,15 @@ const EditorView: React.FC<EditorViewProps> = ({ concept, initialEssentialInfo, 
         <button onClick={onBack} className="text-slate-400 hover:text-white text-sm flex items-center gap-2 font-bold transition-colors bg-white/5 px-4 py-2 rounded-full border border-white/5 hover:border-white/20">
              <span className="text-lg leading-none">‹</span> חזרה לתוצאות
         </button>
-        <div className="text-xs font-mono text-fuchsia-300 bg-fuchsia-500/10 px-3 py-1 rounded border border-fuchsia-500/20">
-             {currentResolution} • {aspectRatio}
+        <div className="flex items-center gap-3">
+          {editHistory.length > 0 && (
+            <div className="text-xs font-mono text-green-300 bg-green-500/10 px-3 py-1 rounded border border-green-500/20">
+              {editHistory.length} עריכות
+            </div>
+          )}
+          <div className="text-xs font-mono text-fuchsia-300 bg-fuchsia-500/10 px-3 py-1 rounded border border-fuchsia-500/20">
+               {currentResolution} • {aspectRatio}
+          </div>
         </div>
       </div>
 
@@ -181,6 +210,20 @@ const EditorView: React.FC<EditorViewProps> = ({ concept, initialEssentialInfo, 
                     <label className={labelStyle}>Visual Changes</label>
                     <textarea value={customRequest} onChange={(e) => setCustomRequest(e.target.value)} placeholder="תאר מה תרצה לשנות בעיצוב..." className={`${inputStyle} h-32 resize-none border-dashed border-white/20 focus:border-solid`} />
                 </div>
+                
+                {/* Show edit history if any */}
+                {editHistory.length > 0 && (
+                  <div className="pt-2 border-t border-white/10">
+                    <label className={labelStyle}>היסטוריית עריכות</label>
+                    <div className="flex flex-col gap-1 max-h-24 overflow-y-auto">
+                      {editHistory.map((edit, index) => (
+                        <div key={index} className="text-xs text-slate-400 bg-slate-800/50 px-2 py-1 rounded truncate">
+                          {index + 1}. {edit}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 
                 <div className="pt-2 border-t border-white/10">
                    <label className={labelStyle}>References</label>
