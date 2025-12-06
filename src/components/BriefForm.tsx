@@ -267,33 +267,62 @@ const BriefForm: React.FC<BriefFormProps> = ({ onSubmit, isSubmitting }) => {
             </div>
           </section>
 
-          {/* Step 2: Inspiration */}
+          {/* Step 2: Files & References - IMPROVED SECTION */}
           <section>
              <div className="flex items-center gap-5 mb-8">
                <StepIndicator num="02" />
-               <h2 className={sectionHeaderClasses}>השראה (רשות)</h2>
+               <h2 className={sectionHeaderClasses}>קבצים ורפרנסים</h2>
             </div>
             
-            <div className="bg-slate-900/30 p-6 rounded-2xl border border-dashed border-white/10 hover:border-fuchsia-500/30 transition-all group">
-               <div className="text-center mb-4">
-                  <h3 className="text-lg font-bold text-white mb-1">יש דוגמה שמצאה חן? 🎯</h3>
-                  <p className="text-sm text-slate-400">העלה אותה וה-AI יתייחס אליה</p>
+            <div className="bg-gradient-to-br from-slate-900/50 to-slate-800/30 p-8 rounded-2xl border border-white/10 hover:border-fuchsia-500/30 transition-all group">
+               <div className="text-center mb-6">
+                  <h3 className="text-xl font-bold text-white mb-3 flex items-center justify-center gap-2">
+                    <span className="text-2xl">📎</span>
+                    העלה קבצים רלוונטיים
+                  </h3>
+                  <p className="text-sm text-slate-300 max-w-2xl mx-auto leading-relaxed">
+                    ה-AI ישתמש בקבצים שלך ליצירת עיצוב מותאם אישית
+                  </p>
+               </div>
+
+               {/* File Type Examples with Icons */}
+               <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+                  <div className="bg-slate-800/50 p-4 rounded-xl text-center border border-white/5 hover:border-fuchsia-500/30 transition-all">
+                    <div className="text-3xl mb-2">🎯</div>
+                    <div className="text-xs font-bold text-white mb-1">לוגו</div>
+                    <div className="text-[10px] text-slate-400">הלוגו שלך</div>
+                  </div>
+                  <div className="bg-slate-800/50 p-4 rounded-xl text-center border border-white/5 hover:border-fuchsia-500/30 transition-all">
+                    <div className="text-3xl mb-2">🖼️</div>
+                    <div className="text-xs font-bold text-white mb-1">תמונות השראה</div>
+                    <div className="text-[10px] text-slate-400">עיצובים שאהבת</div>
+                  </div>
+                  <div className="bg-slate-800/50 p-4 rounded-xl text-center border border-white/5 hover:border-fuchsia-500/30 transition-all">
+                    <div className="text-3xl mb-2">📸</div>
+                    <div className="text-xs font-bold text-white mb-1">תמונות מוצר</div>
+                    <div className="text-[10px] text-slate-400">תמונות שלך</div>
+                  </div>
+                  <div className="bg-slate-800/50 p-4 rounded-xl text-center border border-white/5 hover:border-fuchsia-500/30 transition-all">
+                    <div className="text-3xl mb-2">🎨</div>
+                    <div className="text-xs font-bold text-white mb-1">עיצובים קיימים</div>
+                    <div className="text-[10px] text-slate-400">לשיפור/עדכון</div>
+                  </div>
                </div>
                
                {formData.attachments.length > 0 && (
                    <div className="grid grid-cols-1 gap-3 mb-6">
                       {formData.attachments.map((file) => (
-                        <div key={file.id} className="bg-slate-800/80 p-3 rounded-xl border border-white/5 flex gap-4 items-center">
-                           <div className="w-16 h-16 bg-black/40 rounded-lg flex-shrink-0 overflow-hidden border border-white/5">
+                        <div key={file.id} className="bg-slate-800/80 p-4 rounded-xl border border-white/5 flex gap-4 items-center hover:border-fuchsia-500/30 transition-all">
+                           <div className="w-20 h-20 bg-black/40 rounded-lg flex-shrink-0 overflow-hidden border border-white/10">
                               {file.mimeType.startsWith('image/') ? (
                                  <img src={file.fileBase64} alt={file.fileName} className="w-full h-full object-cover" />
                               ) : (
-                                 <div className="w-full h-full flex items-center justify-center text-slate-600 text-[10px] font-bold">FILE</div>
+                                 <div className="w-full h-full flex items-center justify-center text-slate-600 text-xs font-bold">📄</div>
                               )}
                            </div>
                            <div className="flex-grow">
-                              <div className="flex justify-between items-center mb-1">
-                                 <span className="text-sm text-slate-200 truncate max-w-[200px]">{file.fileName}</span>
+                              <div className="flex justify-between items-center mb-2">
+                                 <span className="text-sm font-medium text-slate-200 truncate max-w-[200px]">{file.fileName}</span>
                                  <button type="button" onClick={() => removeAttachment(file.id)} className="text-slate-500 hover:text-red-400 transition-colors">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
                                       <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -302,26 +331,41 @@ const BriefForm: React.FC<BriefFormProps> = ({ onSubmit, isSubmitting }) => {
                               </div>
                               <input 
                                  type="text"
-                                 placeholder="מה מוצא חן בתמונה?"
-                                 className="w-full bg-transparent border-none p-0 text-xs text-slate-400 placeholder-slate-600 focus:ring-0"
+                                 placeholder="מה ה-AI צריך לדעת על הקובץ הזה? (רשות)"
+                                 className="w-full bg-slate-900/50 border border-white/10 rounded-lg p-2 text-xs text-slate-300 placeholder-slate-600 focus:ring-1 focus:ring-fuchsia-500/50 focus:border-fuchsia-500/50 focus:outline-none"
                                  value={file.userInstruction}
                                  onChange={(e) => updateAttachmentInstruction(file.id, e.target.value)}
                               />
+                              <p className="text-[10px] text-slate-500 mt-1">לדוגמה: ״השתמש בצבעים מהלוגו״, ״שמור על הסגנון הזה״</p>
                            </div>
                         </div>
                       ))}
                    </div>
                )}
                
-               <div className="text-center py-4">
-                  <input type="file" multiple id="file-upload" className="hidden" onChange={handleFileUpload} accept="image/*,text/plain" />
-                  <label htmlFor="file-upload" className="cursor-pointer inline-flex items-center gap-2 px-8 py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 rounded-xl transition-all text-sm font-bold group-hover:text-white group-hover:border-white/20">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5 text-fuchsia-500">
+               <div className="text-center py-6 border-2 border-dashed border-white/10 rounded-xl hover:border-fuchsia-500/50 transition-all">
+                  <input 
+                    type="file" 
+                    multiple 
+                    id="file-upload" 
+                    className="hidden" 
+                    onChange={handleFileUpload} 
+                    accept="image/*,application/pdf,.pdf"
+                  />
+                  <label htmlFor="file-upload" className="cursor-pointer inline-flex flex-col items-center gap-3 px-8 py-4 bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 rounded-xl transition-all text-sm font-bold group-hover:text-white group-hover:border-white/20">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-8 h-8 text-fuchsia-500">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
                     </svg>
-                    העלאת קבצים
+                    <div>
+                      <div className="text-base mb-1">בחר קבצים להעלאה</div>
+                      <div className="text-xs text-slate-500">תמונות, PDF או כל קובץ רלוונטי</div>
+                    </div>
                   </label>
                </div>
+               
+               <p className="text-center text-xs text-slate-500 mt-4">
+                 💡 <strong>טיפ:</strong> אפשר להעלות מספר קבצים בבת אחת
+               </p>
             </div>
           </section>
 
