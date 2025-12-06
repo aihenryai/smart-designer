@@ -23,10 +23,53 @@ const BriefForm: React.FC<BriefFormProps> = ({ onSubmit, isSubmitting }) => {
   });
 
   const [loadingField, setLoadingField] = useState<string | null>(null);
+  const [showAdvanced, setShowAdvanced] = useState(false);
+
+  // Quick select options for different fields
+  const styleOptions = [
+    'מינימליסטי',
+    'צבעוני ושמח',
+    'יוקרתי ואלגנטי',
+    'מודרני וטכנולוגי',
+    'חם וידידותי',
+    'מקצועי ועסקי'
+  ];
+
+  const audienceOptions = [
+    'צעירים (18-25)',
+    'מבוגרים (25-45)',
+    'משפחות',
+    'אנשי עסקים',
+    'כולם'
+  ];
+
+  const goalOptions = [
+    'למכור משהו',
+    'להכריז על מבצע',
+    'להציג מוצר חדש',
+    'לבנות מודעות למותג',
+    'לגייס לקוחות'
+  ];
+
+  const ctaOptions = [
+    'התקשרו עכשיו',
+    'קנו עכשיו',
+    'הזמינו מקום',
+    'בקרו באתר',
+    'הירשמו עכשיו',
+    'שלחו הודעה'
+  ];
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleQuickSelect = (field: keyof DesignBrief, value: string) => {
+    setFormData(prev => ({ 
+      ...prev, 
+      [field]: prev[field] ? `${prev[field]}, ${value}` : value 
+    }));
   };
   
   const handlePlatformToggle = (platform: string) => {
@@ -87,20 +130,20 @@ const BriefForm: React.FC<BriefFormProps> = ({ onSubmit, isSubmitting }) => {
   };
 
   const platformOptions = [
-    { label: "פוסט סושיאל (1:1)", value: "Post 1:1" },
-    { label: "סטורי/טיקטוק (9:16)", value: "Story 9:16" },
-    { label: "פרינט/פוסטר (3:4)", value: "Poster 3:4" },
-    { label: "מסך רחב/מצגת (16:9)", value: "Screen 16:9" }
+    { label: "פוסט", sublabel: "אינסטגרם, פייסבוק", value: "Post 1:1", icon: "📱" },
+    { label: "סטורי", sublabel: "טיקטוק, רילס", value: "Story 9:16", icon: "📲" },
+    { label: "פוסטר", sublabel: "להדפסה, פלייר", value: "Poster 3:4", icon: "🖼️" },
+    { label: "מצגת", sublabel: "מסך רחב", value: "Screen 16:9", icon: "🖥️" }
   ];
 
   const canUseAutoFill = !!(formData.subject && formData.instructions);
 
-  const fieldLabels: Record<string, string> = {
-    targetAudience: 'קהל יעד',
-    goal: 'מטרה עסקית',
-    differentiation: 'ייחוד מותגי',
-    callToAction: 'הנעה לפעולה',
-    coreMessage: 'מסר מרכזי'
+  const fieldLabels: Record<string, { label: string; emoji: string }> = {
+    targetAudience: { label: 'למי זה מיועד', emoji: '👥' },
+    goal: { label: 'מה המטרה של הפוסט', emoji: '🎯' },
+    differentiation: { label: 'מה מייחד אותך', emoji: '⭐' },
+    callToAction: { label: 'מה אתה רוצה שיעשו', emoji: '👆' },
+    coreMessage: { label: 'מה הדבר הכי חשוב שתרצה להעביר', emoji: '💬' }
   };
 
   const MagicWandButton = ({ field, label }: { field: keyof DesignBrief, label: string }) => {
@@ -136,6 +179,21 @@ const BriefForm: React.FC<BriefFormProps> = ({ onSubmit, isSubmitting }) => {
     );
   };
 
+  const QuickSelectButtons = ({ options, field }: { options: string[], field: keyof DesignBrief }) => (
+    <div className="flex flex-wrap gap-2 mt-2 mb-3">
+      {options.map((option) => (
+        <button
+          key={option}
+          type="button"
+          onClick={() => handleQuickSelect(field, option)}
+          className="px-3 py-1.5 text-xs bg-slate-800/50 hover:bg-slate-700/70 text-slate-300 hover:text-white border border-white/10 hover:border-fuchsia-500/50 rounded-lg transition-all"
+        >
+          {option}
+        </button>
+      ))}
+    </div>
+  );
+
   const inputClasses = "w-full p-4 bg-slate-900/40 border border-white/10 text-slate-100 rounded-xl focus:ring-2 focus:ring-fuchsia-500/50 focus:border-transparent focus:bg-slate-900/60 focus:outline-none transition-all placeholder-slate-500 hover:border-white/20 hover:bg-slate-900/50";
   const labelClasses = "block text-xs font-bold text-slate-400 mb-2 tracking-wide uppercase";
   const sectionHeaderClasses = "text-2xl font-bold text-white tracking-tight";
@@ -163,15 +221,19 @@ const BriefForm: React.FC<BriefFormProps> = ({ onSubmit, isSubmitting }) => {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-16">
+          {/* Step 1: Project Definition */}
           <section>
             <div className="flex items-center gap-5 mb-8">
                <StepIndicator num="01" />
                <h2 className={sectionHeaderClasses}>הגדרת הפרויקט</h2>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="col-span-1 md:col-span-2">
-                <label className={labelClasses}>נושא העיצוב <span className="text-fuchsia-500">*</span></label>
+            <div className="grid grid-cols-1 gap-8">
+              {/* Subject Field - Updated Label */}
+              <div>
+                <label className={labelClasses}>
+                  מה אתה רוצה ליצור? ✨ <span className="text-fuchsia-500">*</span>
+                </label>
                 <input 
                   type="text" 
                   name="subject" 
@@ -179,23 +241,33 @@ const BriefForm: React.FC<BriefFormProps> = ({ onSubmit, isSubmitting }) => {
                   value={formData.subject} 
                   onChange={handleInputChange} 
                   className={inputClasses} 
-                  placeholder="לדוגמה: פוסט לאינסטגרם למותג אופנה, לוגו לחברת הייטק..." 
+                  placeholder="פוסט לאינסטגרם | סטורי לטיקטוק | כרטיס ביקור | פלייר..." 
                 />
+                <p className="text-xs text-slate-500 mt-2">💡 טיפ: תאר בקצרה - למשל ״פוסט לסייל חורף בחנות בגדים״</p>
               </div>
-              <div className="col-span-1 md:col-span-2">
-                <label className={labelClasses}>תיאור והנחיות עיצוב <span className="text-fuchsia-500">*</span></label>
+
+              {/* Instructions Field - Updated Label */}
+              <div>
+                <label className={labelClasses}>
+                  איך תרצה שזה ייראה? 🎨 <span className="text-fuchsia-500">*</span>
+                </label>
                 <textarea 
                   name="instructions" 
                   required 
                   value={formData.instructions} 
                   onChange={handleInputChange} 
                   className={`${inputClasses} h-32`} 
-                  placeholder="לדוגמה: סגנון נקי ויוקרתי, שימוש בצבעי שחור וזהב, מראה מינימליסטי..." 
+                  placeholder="תאר את הסגנון, הצבעים, והאווירה שאתה מדמיין..." 
                 />
+                <div className="mt-2">
+                  <p className="text-xs text-slate-500 mb-2">סגנונות מוכנים:</p>
+                  <QuickSelectButtons options={styleOptions} field="instructions" />
+                </div>
               </div>
             </div>
           </section>
 
+          {/* Step 2: Inspiration */}
           <section>
              <div className="flex items-center gap-5 mb-8">
                <StepIndicator num="02" />
@@ -203,11 +275,16 @@ const BriefForm: React.FC<BriefFormProps> = ({ onSubmit, isSubmitting }) => {
             </div>
             
             <div className="bg-slate-900/30 p-6 rounded-2xl border border-dashed border-white/10 hover:border-fuchsia-500/30 transition-all group">
+               <div className="text-center mb-4">
+                  <h3 className="text-lg font-bold text-white mb-1">יש לך דוגמה שאהבת? 🎯</h3>
+                  <p className="text-sm text-slate-400">העלה אותה וה-AI יתייחס אליה</p>
+               </div>
+               
                {formData.attachments.length > 0 && (
                    <div className="grid grid-cols-1 gap-3 mb-6">
                       {formData.attachments.map((file) => (
                         <div key={file.id} className="bg-slate-800/80 p-3 rounded-xl border border-white/5 flex gap-4 items-center">
-                           <div className="w-12 h-12 bg-black/40 rounded-lg flex-shrink-0 overflow-hidden border border-white/5">
+                           <div className="w-16 h-16 bg-black/40 rounded-lg flex-shrink-0 overflow-hidden border border-white/5">
                               {file.mimeType.startsWith('image/') ? (
                                  <img src={file.fileBase64} alt={file.fileName} className="w-full h-full object-cover" />
                               ) : (
@@ -225,7 +302,7 @@ const BriefForm: React.FC<BriefFormProps> = ({ onSubmit, isSubmitting }) => {
                               </div>
                               <input 
                                  type="text"
-                                 placeholder="מה לקחת מכאן?"
+                                 placeholder="מה אהבת בתמונה הזו?"
                                  className="w-full bg-transparent border-none p-0 text-xs text-slate-400 placeholder-slate-600 focus:ring-0"
                                  value={file.userInstruction}
                                  onChange={(e) => updateAttachmentInstruction(file.id, e.target.value)}
@@ -240,7 +317,7 @@ const BriefForm: React.FC<BriefFormProps> = ({ onSubmit, isSubmitting }) => {
                   <input type="file" multiple id="file-upload" className="hidden" onChange={handleFileUpload} accept="image/*,text/plain" />
                   <label htmlFor="file-upload" className="cursor-pointer inline-flex items-center gap-2 px-8 py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 rounded-xl transition-all text-sm font-bold group-hover:text-white group-hover:border-white/20">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5 text-fuchsia-500">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M12 12.75l7.5-7.5 7.5 7.5M12 3v18" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
                     </svg>
                     העלאת קבצים
                   </label>
@@ -248,6 +325,7 @@ const BriefForm: React.FC<BriefFormProps> = ({ onSubmit, isSubmitting }) => {
             </div>
           </section>
 
+          {/* Step 3: Refinement */}
           <section>
             <div className="flex items-center gap-5 mb-8">
                <StepIndicator num="03" />
@@ -255,78 +333,157 @@ const BriefForm: React.FC<BriefFormProps> = ({ onSubmit, isSubmitting }) => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+               {/* Essential Info Field - Updated Label */}
                <div className="col-span-1 md:col-span-2">
-                <label className={labelClasses}>טקסטים ופרטים טכניים (רשות)</label>
+                <label className={labelClasses}>מה לכתוב על העיצוב? 📝 (רשות)</label>
                 <textarea 
                   name="essentialInfo" 
                   value={formData.essentialInfo} 
                   onChange={handleInputChange} 
                   className={`${inputClasses} h-28`} 
-                  placeholder="רשמו כאן את הטקסט שיופיע על גבי העיצוב" 
+                  placeholder="הכותרת, המחיר, פרטי יצירת קשר, או כל טקסט שתרצה שיופיע" 
                 />
               </div>
-              {['targetAudience', 'goal', 'differentiation', 'callToAction'].map((field) => (
-                 <div key={field} className={field === 'differentiation' || field === 'coreMessage' ? 'col-span-1 md:col-span-2' : ''}>
-                   <div className="flex justify-between items-center mb-2 flex-wrap gap-2">
-                      <label className={labelClasses}>
-                         {fieldLabels[field] || field}
-                      </label>
-                      <MagicWandButton field={field as any} label={fieldLabels[field] || field} />
-                   </div>
-                   <input 
-                      type="text" 
-                      name={field} 
-                      value={(formData as any)[field]} 
-                      onChange={handleInputChange} 
-                      className={inputClasses} 
-                      placeholder={
-                        field === 'targetAudience' ? 'לדוגמה: בני 20-35' :
-                        field === 'goal' ? 'קידום מכירות' : ''
-                      }
-                    />
-                 </div>
-              ))}
-              <div className="col-span-1 md:col-span-2">
+
+              {/* Target Audience - Updated */}
+              <div>
                 <div className="flex justify-between items-center mb-2 flex-wrap gap-2">
-                  <label className={labelClasses}>מסר מרכזי</label>
-                  <MagicWandButton field="coreMessage" label="מסר מרכזי" />
+                  <label className={labelClasses}>
+                    {fieldLabels.targetAudience.emoji} {fieldLabels.targetAudience.label}
+                  </label>
+                  <MagicWandButton field="targetAudience" label={fieldLabels.targetAudience.label} />
+                </div>
+                <input 
+                  type="text" 
+                  name="targetAudience" 
+                  value={formData.targetAudience} 
+                  onChange={handleInputChange} 
+                  className={inputClasses} 
+                  placeholder="למי אתה רוצה למכור? נשים, גברים, גיל מסוים?"
+                />
+                <QuickSelectButtons options={audienceOptions} field="targetAudience" />
+              </div>
+
+              {/* Goal - Updated */}
+              <div>
+                <div className="flex justify-between items-center mb-2 flex-wrap gap-2">
+                  <label className={labelClasses}>
+                    {fieldLabels.goal.emoji} {fieldLabels.goal.label}
+                  </label>
+                  <MagicWandButton field="goal" label={fieldLabels.goal.label} />
+                </div>
+                <input 
+                  type="text" 
+                  name="goal" 
+                  value={formData.goal} 
+                  onChange={handleInputChange} 
+                  className={inputClasses}
+                  placeholder="מה אתה רוצה להשיג?"
+                />
+                <QuickSelectButtons options={goalOptions} field="goal" />
+              </div>
+
+              {/* Call to Action - Updated */}
+              <div>
+                <div className="flex justify-between items-center mb-2 flex-wrap gap-2">
+                  <label className={labelClasses}>
+                    {fieldLabels.callToAction.emoji} {fieldLabels.callToAction.label}
+                  </label>
+                  <MagicWandButton field="callToAction" label={fieldLabels.callToAction.label} />
+                </div>
+                <input 
+                  type="text" 
+                  name="callToAction" 
+                  value={formData.callToAction} 
+                  onChange={handleInputChange} 
+                  className={inputClasses}
+                  placeholder="לחצו כאן? התקשרו? בקרו?"
+                />
+                <QuickSelectButtons options={ctaOptions} field="callToAction" />
+              </div>
+
+              {/* Core Message - Updated */}
+              <div>
+                <div className="flex justify-between items-center mb-2 flex-wrap gap-2">
+                  <label className={labelClasses}>
+                    {fieldLabels.coreMessage.emoji} {fieldLabels.coreMessage.label}
+                  </label>
+                  <MagicWandButton field="coreMessage" label={fieldLabels.coreMessage.label} />
                 </div>
                 <textarea 
                   name="coreMessage" 
                   value={formData.coreMessage} 
                   onChange={handleInputChange} 
-                  className={`${inputClasses} h-24`} 
+                  className={`${inputClasses} h-24`}
+                  placeholder="המשפט או הרעיון המרכזי של הפוסט"
                 />
               </div>
+
+              {/* Advanced Settings Toggle */}
+              <div className="col-span-1 md:col-span-2">
+                <button
+                  type="button"
+                  onClick={() => setShowAdvanced(!showAdvanced)}
+                  className="text-sm text-slate-400 hover:text-fuchsia-400 transition-colors flex items-center gap-2"
+                >
+                  <span>{showAdvanced ? '▼' : '◀'}</span>
+                  <span>הגדרות מתקדמות (למשתמשים מנוסים)</span>
+                </button>
+              </div>
+
+              {/* Differentiation - Hidden by default */}
+              {showAdvanced && (
+                <div className="col-span-1 md:col-span-2">
+                  <div className="flex justify-between items-center mb-2 flex-wrap gap-2">
+                    <label className={labelClasses}>
+                      {fieldLabels.differentiation.emoji} {fieldLabels.differentiation.label}
+                    </label>
+                    <MagicWandButton field="differentiation" label={fieldLabels.differentiation.label} />
+                  </div>
+                  <input 
+                    type="text" 
+                    name="differentiation" 
+                    value={formData.differentiation} 
+                    onChange={handleInputChange} 
+                    className={inputClasses}
+                    placeholder="מה עושה אותך שונה מהמתחרים?"
+                  />
+                </div>
+              )}
             </div>
           </section>
 
+          {/* Step 4: Format Selection - Updated */}
           <section>
             <div className="flex items-center gap-5 mb-8">
                <StepIndicator num="04" />
-               <h2 className={sectionHeaderClasses}>פורמט רוחב גובה</h2>
+               <h2 className={sectionHeaderClasses}>איפה זה יפורסם? 📱</h2>
             </div>
+            <p className="text-slate-400 text-sm mb-6">בחר את הגודל המתאים לפלטפורמה שלך:</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {platformOptions.map(platform => (
                 <button
                   key={platform.value}
                   type="button"
                   onClick={() => handlePlatformToggle(platform.value)}
-                  className={`px-6 py-5 rounded-xl text-sm transition-all border text-right flex items-center justify-between group ${
+                  className={`p-6 rounded-xl text-sm transition-all border text-center group ${
                     formData.platforms.includes(platform.value)
                       ? 'bg-gradient-to-r from-violet-600/30 to-fuchsia-600/30 border-fuchsia-500 text-white shadow-lg shadow-fuchsia-500/10'
                       : 'bg-slate-900/40 text-slate-400 border-white/5 hover:border-white/20 hover:bg-slate-800/60'
                   }`}
                 >
-                  <span className="font-bold group-hover:text-white transition-colors text-base">{platform.label}</span>
+                  <div className="text-4xl mb-2">{platform.icon}</div>
+                  <div className="font-bold text-lg mb-1 group-hover:text-white transition-colors">{platform.label}</div>
+                  <div className="text-xs text-slate-500">{platform.sublabel}</div>
                   {formData.platforms.includes(platform.value) && (
-                     <div className="w-3 h-3 rounded-full bg-gradient-to-r from-violet-500 to-fuchsia-500 shadow-glow"></div>
+                     <div className="mt-3 w-3 h-3 mx-auto rounded-full bg-gradient-to-r from-violet-500 to-fuchsia-500 shadow-glow"></div>
                   )}
                 </button>
               ))}
             </div>
           </section>
 
+          {/* Submit Button */}
           <button
             type="submit"
             disabled={isSubmitting}
@@ -336,7 +493,7 @@ const BriefForm: React.FC<BriefFormProps> = ({ onSubmit, isSubmitting }) => {
                 : 'bg-gradient-to-r from-violet-600 via-fuchsia-600 to-orange-500 hover:shadow-2xl hover:shadow-fuchsia-600/30 hover:-translate-y-1'
             }`}
           >
-            {isSubmitting ? 'מעבד...' : 'צור סקיצות'}
+            {isSubmitting ? 'מעבד...' : '🚀 צור עיצובים!'}
           </button>
         </form>
       </div>
