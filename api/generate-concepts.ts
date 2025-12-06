@@ -62,8 +62,8 @@ export default async function handler(
 
     const ai = new GoogleGenAI({ apiKey: API_KEY });
     const TEXT_MODEL = "gemini-2.5-flash";
-    // Use Imagen 4 for image generation - correct model name
-    const IMAGE_MODEL = "imagen-4.0-fast-generate-001";
+    // Use Gemini 3 Pro Image Preview for proper Hebrew text rendering
+    const IMAGE_MODEL = "gemini-3-pro-image-preview";
 
     const attachmentsInfo = (brief.attachments || []).map((att: any, idx: number) => 
       `Attachment ${idx + 1} (${att.fileName}): ${att.userInstruction}`
@@ -147,7 +147,7 @@ export default async function handler(
     const conceptsWithImages = await Promise.all(
       textConcepts.map(async (concept: any) => {
         try {
-          // Use generateImages API for Imagen 4 model
+          // Use generateImages API for Gemini image model
           const imgResponse = await callWithTimeout(
             ai.models.generateImages({
               model: IMAGE_MODEL,
