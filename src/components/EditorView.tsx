@@ -105,7 +105,7 @@ const EditorView: React.FC<EditorViewProps> = ({ concept, initialEssentialInfo, 
 
   const handleFinalDownload = async () => {
     setIsProcessing(true);
-    setProcessLabel(exportQuality === "4K" ? "Upscaling..." : "מכין להורדה...");
+    setProcessLabel(exportQuality === "4K" ? "משדרג איכות..." : "מכין להורדה...");
     try {
         let downloadUrl = currentImageUrl;
         if (exportQuality !== currentResolution) {
@@ -197,27 +197,46 @@ const EditorView: React.FC<EditorViewProps> = ({ concept, initialEssentialInfo, 
             
             <div className="space-y-6 flex-grow">
                 <div>
-                    <label className={labelStyle}>Headline (Copy)</label>
-                    <input type="text" value={headline} onChange={(e) => setHeadline(e.target.value)} className={inputStyle} />
+                    <label className={labelStyle}>כותרת 📝</label>
+                    <input 
+                      type="text" 
+                      value={headline} 
+                      onChange={(e) => setHeadline(e.target.value)} 
+                      className={inputStyle}
+                      placeholder="הכותרת המרכזית של העיצוב" 
+                    />
                 </div>
                 
                 <div>
-                    <label className={labelStyle}>Content</label>
-                    <textarea value={essentialInfo} onChange={(e) => setEssentialInfo(e.target.value)} className={`${inputStyle} h-24 resize-none`} />
+                    <label className={labelStyle}>תוכן 📄</label>
+                    <textarea 
+                      value={essentialInfo} 
+                      onChange={(e) => setEssentialInfo(e.target.value)} 
+                      className={`${inputStyle} h-24 resize-none`}
+                      placeholder="הטקסט שיופיע בעיצוב"
+                    />
                 </div>
 
                 <div>
-                    <label className={labelStyle}>Visual Changes</label>
-                    <textarea value={customRequest} onChange={(e) => setCustomRequest(e.target.value)} placeholder="תאר מה תרצה לשנות בעיצוב..." className={`${inputStyle} h-32 resize-none border-dashed border-white/20 focus:border-solid`} />
+                    <label className={labelStyle}>שינויים בעיצוב 🎨</label>
+                    <textarea 
+                      value={customRequest} 
+                      onChange={(e) => setCustomRequest(e.target.value)} 
+                      placeholder="רוצה צבעים אחרים? גופן שונה? תאר כאן..." 
+                      className={`${inputStyle} h-32 resize-none border-dashed border-white/20 focus:border-solid`} 
+                    />
+                    <p className="text-xs text-slate-500 mt-2">
+                      💡 לדוגמה: ״שנה את הצבע לכחול״, ״הוסף רקע עם שקיעה״
+                    </p>
                 </div>
                 
                 {/* Show edit history if any */}
                 {editHistory.length > 0 && (
                   <div className="pt-2 border-t border-white/10">
-                    <label className={labelStyle}>היסטוריית עריכות</label>
+                    <label className={labelStyle}>היסטוריית עריכות 📋</label>
                     <div className="flex flex-col gap-1 max-h-24 overflow-y-auto">
                       {editHistory.map((edit, index) => (
-                        <div key={index} className="text-xs text-slate-400 bg-slate-800/50 px-2 py-1 rounded truncate">
+                        <div key={index} className="text-xs text-slate-400 bg-slate-800/50 px-2 py-1 rounded truncate" title={edit}>
                           {index + 1}. {edit}
                         </div>
                       ))}
@@ -226,7 +245,8 @@ const EditorView: React.FC<EditorViewProps> = ({ concept, initialEssentialInfo, 
                 )}
                 
                 <div className="pt-2 border-t border-white/10">
-                   <label className={labelStyle}>References</label>
+                   <label className={labelStyle}>קבצי רפרנס 🖼️</label>
+                   <p className="text-xs text-slate-500 mb-3">העלה תמונות השראה</p>
                    <div className="flex flex-col gap-2 mb-3">
                        {attachments.map(att => (
                            <div key={att.id} className="flex justify-between items-center text-xs bg-slate-800/50 p-3 rounded-lg border border-white/5">
@@ -236,38 +256,47 @@ const EditorView: React.FC<EditorViewProps> = ({ concept, initialEssentialInfo, 
                        ))}
                    </div>
                    <label className="cursor-pointer flex items-center justify-center gap-2 text-xs font-bold text-slate-300 hover:text-white transition-all bg-white/5 hover:bg-white/10 p-3 rounded-xl border border-white/5 hover:border-white/20">
-                        <input type="file" onChange={handleFileUpload} className="hidden" />
-                        <span className="text-lg leading-none">+</span> העלאת קובץ רפרנס
+                        <input type="file" onChange={handleFileUpload} multiple accept="image/*" className="hidden" />
+                        <span className="text-lg leading-none">+</span> העלאת קובץ
                    </label>
                 </div>
             </div>
 
             <div className="mt-4 pt-6 border-t border-white/10 space-y-4">
-                <button onClick={handleUpdateDraft} disabled={isProcessing} className="w-full py-4 bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white rounded-xl font-bold text-base transition-all disabled:opacity-50 shadow-lg shadow-fuchsia-900/30 transform active:scale-95">
+                <button 
+                  onClick={handleUpdateDraft} 
+                  disabled={isProcessing} 
+                  className="w-full py-4 bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white rounded-xl font-bold text-base transition-all disabled:opacity-50 shadow-lg shadow-fuchsia-900/30 transform active:scale-95"
+                >
                     עדכון סקיצה
                 </button>
 
                 <div className="bg-black/30 p-4 rounded-xl border border-white/5 space-y-3">
+                    <div className="text-xs text-slate-400 mb-2 font-bold">הורדה סופית 📥</div>
                     <div className="flex gap-2">
                         <select 
-                        value={exportQuality} 
-                        onChange={(e) => setExportQuality(e.target.value as any)}
-                        className="flex-1 bg-slate-800 text-slate-300 text-xs font-bold border border-white/10 rounded-lg p-3 outline-none focus:ring-1 focus:ring-white/20"
+                          value={exportQuality} 
+                          onChange={(e) => setExportQuality(e.target.value as any)}
+                          className="flex-1 bg-slate-800 text-slate-300 text-xs font-bold border border-white/10 rounded-lg p-3 outline-none focus:ring-1 focus:ring-white/20"
                         >
-                            <option value="1K">1K (מהיר)</option>
-                            <option value="4K">4K (איכותי)</option>
+                            <option value="1K">איכות רגילה</option>
+                            <option value="4K">איכות גבוהה</option>
                         </select>
                         <select 
-                        value={exportFormat} 
-                        onChange={(e) => setExportFormat(e.target.value as any)}
-                        className="flex-1 bg-slate-800 text-slate-300 text-xs font-bold border border-white/10 rounded-lg p-3 outline-none focus:ring-1 focus:ring-white/20"
+                          value={exportFormat} 
+                          onChange={(e) => setExportFormat(e.target.value as any)}
+                          className="flex-1 bg-slate-800 text-slate-300 text-xs font-bold border border-white/10 rounded-lg p-3 outline-none focus:ring-1 focus:ring-white/20"
                         >
                             <option value="png">PNG</option>
                             <option value="jpg">JPG</option>
                             <option value="pdf">PDF</option>
                         </select>
                     </div>
-                    <button onClick={handleFinalDownload} disabled={isProcessing} className="w-full py-3 bg-white text-slate-900 rounded-lg font-bold text-sm hover:bg-slate-200 transition-colors shadow-lg">
+                    <button 
+                      onClick={handleFinalDownload} 
+                      disabled={isProcessing} 
+                      className="w-full py-3 bg-white text-slate-900 rounded-lg font-bold text-sm hover:bg-slate-200 transition-colors shadow-lg disabled:opacity-50"
+                    >
                         הורדה למחשב
                     </button>
                 </div>
