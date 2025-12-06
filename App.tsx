@@ -15,30 +15,54 @@ const App: React.FC = () => {
   const [selectedConcept, setSelectedConcept] = useState<AIConcept | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
+  const [loadingStep, setLoadingStep] = useState(0);
   
   const { userCredits, refreshCredits } = useAuth();
+
+  const loadingSteps = [
+    "מנתח את הבקשה...",
+    "יוצר 4 כיוונים יצירתיים...",
+    "מייצר תמונות...",
+    "כמעט מוכן!"
+  ];
 
   const handleBriefSubmit = async (brief: DesignBrief) => {
     setBriefData(brief);
     setAppState(AppState.LOADING);
     setError(null);
+    setLoadingStep(0);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // Simulate progressive loading steps
+    const stepInterval = setInterval(() => {
+      setLoadingStep(prev => {
+        if (prev < loadingSteps.length - 1) return prev + 1;
+        return prev;
+      });
+    }, 3000);
 
     try {
       const result = await generateConcepts(brief);
+      
+      clearInterval(stepInterval);
+      setLoadingStep(loadingSteps.length - 1);
       
       if (!result.concepts || result.concepts.length === 0) {
         throw new Error("לא נוצרו קונספטים. אנא נסה שנית.");
       }
 
-      setConcepts(result.concepts);
-      setAppState(AppState.RESULTS);
+      // Small delay to show final step
+      setTimeout(() => {
+        setConcepts(result.concepts);
+        setAppState(AppState.RESULTS);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }, 500);
       
       // Refresh credits after successful generation
       await refreshCredits();
       
-      window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err: any) {
+      clearInterval(stepInterval);
       console.error("Submission error:", err);
       
       // Check if it's a credits error
@@ -62,6 +86,7 @@ const App: React.FC = () => {
     setSelectedConcept(null);
     setAppState(AppState.FORM);
     setError(null);
+    setLoadingStep(0);
   };
 
   const handleSelectConcept = (concept: AIConcept) => {
@@ -141,11 +166,20 @@ const App: React.FC = () => {
                    <div className="w-20 h-20 bg-gradient-to-tr from-violet-600 to-fuchsia-600 rounded-full blur-2xl animate-pulse opacity-50"></div>
                 </div>
              </div>
-            <h2 className="text-4xl font-bold text-white mb-4 bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">
-              מעבד נתונים
+            <h2 className="text-4xl font-bold text-white mb-6 bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">
+              {loadingSteps[loadingStep]}
             </h2>
-            <p className="text-fuchsia-300/80 text-sm tracking-[0.2em] uppercase font-bold">
-              Smart Studio בונה קונספטים...
+            
+            {/* Progress bar */}
+            <div className="w-64 h-2 bg-slate-800/50 rounded-full overflow-hidden mb-4">
+              <div 
+                className="h-full bg-gradient-to-r from-violet-500 to-fuchsia-500 transition-all duration-500 ease-out"
+                style={{ width: `${((loadingStep + 1) / loadingSteps.length) * 100}%` }}
+              ></div>
+            </div>
+            
+            <p className="text-slate-400 text-sm">
+              שלב {loadingStep + 1} מתוך {loadingSteps.length}
             </p>
           </div>
         )}
