@@ -54,8 +54,8 @@ export default async function handler(
 
     const ai = new GoogleGenAI({ apiKey: API_KEY });
     const TEXT_MODEL = "gemini-2.5-flash";
-    // Use Gemini 2.5 Flash Image for proper Hebrew text rendering
-    const IMAGE_MODEL = "gemini-2.5-flash-image";
+    // Use Gemini 3 Pro Image Preview (Nano Banana Pro) for Hebrew text rendering
+    const IMAGE_MODEL = "gemini-3-pro-image-preview";
 
     // Generate improved prompt based on edits
     const rewritePrompt = `
@@ -103,7 +103,7 @@ export default async function handler(
     const imageSize = edits.imageSize === "4K" ? "2K" : "1K";
     const timeout = edits.imageSize === "4K" ? 180000 : 120000;
 
-    // Use generateContent with IMAGE response modality for Gemini 2.5 Flash Image
+    // Use generateContent with IMAGE response modality for Gemini 3 Pro Image (Nano Banana Pro)
     const imgResponse = await callWithTimeout(
       ai.models.generateContent({
         model: IMAGE_MODEL,
