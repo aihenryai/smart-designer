@@ -34,10 +34,15 @@ export default async function handler(
   }
 
   try {
-    const { targetField, context } = req.body;
+    // Accept both 'field' and 'targetField' for backwards compatibility
+    const { field, targetField, context } = req.body;
+    const actualField = field || targetField;
 
-    if (!targetField || !context) {
-      return res.status(400).json({ error: 'Missing required fields' });
+    if (!actualField || !context) {
+      return res.status(400).json({ 
+        error: 'Missing required fields',
+        details: `field: ${actualField ? 'present' : 'missing'}, context: ${context ? 'present' : 'missing'}`
+      });
     }
 
     const API_KEY = process.env.GEMINI_API_KEY;
@@ -48,15 +53,26 @@ export default async function handler(
     const ai = new GoogleGenAI({ apiKey: API_KEY });
     const TEXT_MODEL = "gemini-2.5-flash";
 
+    // Map field names to Hebrew labels for better context
+    const fieldLabels: Record<string, string> = {
+      targetAudience: 'קהל יעד',
+      goal: 'מטרה עסקית',
+      differentiation: 'ייחוד מותגי',
+      callToAction: 'הנעה לפעולה',
+      coreMessage: 'מסר מרכזי'
+    };
+
+    const fieldLabel = fieldLabels[actualField] || actualField;
+
     const prompt = `
       CONTEXT:
-      Subject: ${context.subject}
-      Instructions: ${context.instructions}
-      Essential Info: ${context.essentialInfo}
+      Subject: ${context.subject || ''}
+      Instructions: ${context.instructions || ''}
+      Essential Info: ${context.essentialInfo || ''}
 
       TASK:
       You are a world-class creative director at a top design studio.
-      Your goal is to provide a specific, professional, and sharp Hebrew suggestion for the form field: "${targetField}".
+      Your goal is to provide a specific, professional, and sharp Hebrew suggestion for the form field: "${fieldLabel}".
       
       GUIDELINES:
       1. Language: HEBREW ONLY.
