@@ -54,8 +54,8 @@ export default async function handler(
 
     const ai = new GoogleGenAI({ apiKey: API_KEY });
     const TEXT_MODEL = "gemini-2.5-flash";
-    // Use Gemini 3 Pro Image Preview for proper Hebrew text rendering
-    const IMAGE_MODEL = "gemini-3-pro-image-preview";
+    // Use Gemini 2.5 Flash Image for proper Hebrew text rendering
+    const IMAGE_MODEL = "gemini-2.5-flash-image";
 
     // Generate improved prompt based on edits
     const rewritePrompt = `
@@ -100,17 +100,20 @@ export default async function handler(
     else if (ratioStr.includes("4:3")) aspectRatio = "4:3";
     else if (ratioStr.includes("3:4")) aspectRatio = "3:4";
 
+    const imageSize = edits.imageSize === "4K" ? "2K" : "1K";
     const timeout = edits.imageSize === "4K" ? 180000 : 120000;
 
-    // Use generateImages API for Gemini image model
+    // Use generateContent with IMAGE response modality for Gemini 2.5 Flash Image
     const imgResponse = await callWithTimeout(
-      ai.models.generateImages({
+      ai.models.generateContent({
         model: IMAGE_MODEL,
-        prompt: newPrompt,
+        contents: { parts: [{ text: newPrompt }] },
         config: {
-          numberOfImages: 1,
-          outputMimeType: 'image/png',
-          aspectRatio: aspectRatio,
+          responseModalities: ['IMAGE'],
+          imageConfig: {
+            aspectRatio: aspectRatio,
+            imageSize: imageSize
+          }
         }
       }),
       timeout,
@@ -119,11 +122,17 @@ export default async function handler(
 
     let imageUrl = "";
     
-    // Extract image from response
-    if (imgResponse.generatedImages && imgResponse.generatedImages.length > 0) {
-      const imageData = imgResponse.generatedImages[0].image?.imageBytes;
-      if (imageData) {
-        imageUrl = `data:image/png;base64,${imageData}`;
+    // Extract image from response - Gemini returns image in inlineData
+    if (imgResponse.candidates && imgResponse.candidates.length > 0) {
+      const parts = imgResponse.candidates[0].content.parts;
+      for (const part of parts) {
+        if (part.inlineData) {
+          const imageData = part.inlineData.data;
+          if (imageData) {
+            imageUrl = `data:image/png;base64,${imageData}`;
+            break;
+          }
+        }
       }
     }
 
