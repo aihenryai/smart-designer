@@ -34,8 +34,8 @@ export default async function handler(
   }
 
   try {
-    // Dynamic import for auth middleware
-    const { verifyAuth, checkCredits, useCredit, sendAuthError, sendCreditsError } = await import('./lib/auth-middleware');
+    // Dynamic import for auth middleware with .js extension for ESM compatibility
+    const { verifyAuth, checkCredits, useCredit, sendAuthError, sendCreditsError } = await import('./lib/auth-middleware.js');
     
     // Verify authentication
     const user = await verifyAuth(req);
