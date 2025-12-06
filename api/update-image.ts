@@ -63,18 +63,20 @@ export default async function handler(
       ORIGINAL PROMPT: "${concept.imageGenerationPrompt}"
       
       USER REQUESTED CHANGES:
-      - New Headline Text: "${edits.newHeadline}"
+      - New Headline Text (HEBREW): "${edits.newHeadline}"
       - Visual Edits: "${edits.userInstructions}"
       
       TASK: Rewrite the prompt to incorporate these changes naturally.
       
-      REQUIREMENTS:
-      1. Write only in English
-      2. Do not include any Hebrew text in the prompt itself
-      3. Focus on visual composition, colors, lighting, style
-      4. Describe where text elements would be placed (but don't include actual text)
+      CRITICAL REQUIREMENTS:
+      1. Write the prompt structure in English
+      2. MUST include the actual HEBREW headline text: "${edits.newHeadline}"
+      3. Specify exactly where and how this Hebrew text should appear in the design
+      4. The image generator supports Hebrew text rendering - use it!
+      5. Focus on visual composition, colors, lighting, style
+      6. Example: "Modern poster design with bold Hebrew headline '${edits.newHeadline}' centered at the top, professional layout..."
       
-      OUTPUT: Only the new English prompt, nothing else.
+      OUTPUT: Only the new English prompt with embedded Hebrew text, nothing else.
     `;
 
     let newPrompt = concept.imageGenerationPrompt;
@@ -85,7 +87,8 @@ export default async function handler(
       });
       if (response.text) newPrompt = response.text.trim();
     } catch (e) {
-      newPrompt = `${concept.imageGenerationPrompt}. Additional requirements: ${edits.userInstructions}`;
+      // Fallback: manually add Hebrew text to original prompt
+      newPrompt = `${concept.imageGenerationPrompt}. Updated with Hebrew headline '${edits.newHeadline}' prominently displayed. ${edits.userInstructions}`;
     }
 
     // Determine aspect ratio
