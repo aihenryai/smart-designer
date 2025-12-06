@@ -30,7 +30,8 @@ export default function Pricing() {
       // Get auth token
       const token = await currentUser.getIdToken();
 
-      const response = await fetch('/api/create-checkout', {
+      // Use consolidated payments endpoint
+      const response = await fetch('/api/payments?action=create-checkout', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
