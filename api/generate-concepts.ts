@@ -43,8 +43,8 @@ export default async function handler(
       return sendAuthError(res);
     }
 
-    // Check credits
-    const creditsStatus = await checkCredits(user.uid);
+    // Check credits - pass email for unlimited access check
+    const creditsStatus = await checkCredits(user.uid, user.email);
     if (!creditsStatus.hasCredits) {
       return sendCreditsError(res, creditsStatus.remaining);
     }
