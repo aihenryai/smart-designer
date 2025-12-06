@@ -57,38 +57,55 @@ export default async function handler(
     // Use Gemini 3 Pro Image Preview (Nano Banana Pro) for Hebrew text rendering
     const IMAGE_MODEL = "gemini-3-pro-image-preview";
 
-    // Generate improved prompt based on edits
+    // Build edit context for sequential edits
+    const currentPrompt = concept.imageGenerationPrompt || "";
+    const hasHeadlineChange = edits.newHeadline && edits.newHeadline !== concept.headline;
+    const hasVisualChanges = edits.userInstructions && edits.userInstructions.trim().length > 0;
+    
+    // Generate improved prompt based on edits - building on top of current prompt
     const rewritePrompt = `
       Act as an Expert Prompt Engineer for image generation.
-      ORIGINAL PROMPT: "${concept.imageGenerationPrompt}"
+      You are helping with SEQUENTIAL EDITS - each edit builds upon the previous version.
       
-      USER REQUESTED CHANGES:
-      - New Headline Text (HEBREW): "${edits.newHeadline}"
-      - Visual Edits: "${edits.userInstructions}"
+      CURRENT PROMPT (this is the latest version with all previous edits applied):
+      "${currentPrompt}"
       
-      TASK: Rewrite the prompt to incorporate these changes naturally.
+      NEW CHANGES REQUESTED:
+      ${hasHeadlineChange ? `- Updated Hebrew Headline Text: "${edits.newHeadline}"` : '- Headline unchanged'}
+      ${hasVisualChanges ? `- Visual Modifications: "${edits.userInstructions}"` : '- No visual changes specified'}
+      ${edits.newEssentialInfo ? `- Content/Text Info: "${edits.newEssentialInfo}"` : ''}
+      
+      TASK: Create an updated prompt that:
+      1. KEEPS all existing style, composition and visual elements from the current prompt
+      2. INTEGRATES the new changes naturally
+      3. Ensures the Hebrew text "${edits.newHeadline}" appears prominently in the design
+      4. Applies visual modifications while maintaining design consistency
       
       CRITICAL REQUIREMENTS:
-      1. Write the prompt structure in English
-      2. MUST include the actual HEBREW headline text: "${edits.newHeadline}"
-      3. Specify exactly where and how this Hebrew text should appear in the design
-      4. The image generator supports Hebrew text rendering - use it!
-      5. Focus on visual composition, colors, lighting, style
-      6. Example: "Modern poster design with bold Hebrew headline '${edits.newHeadline}' centered at the top, professional layout..."
+      - The prompt structure should be in English
+      - MUST include the actual HEBREW text: "${edits.newHeadline}"
+      - Preserve the overall style and quality from the original
+      - Build incrementally - don't start from scratch
+      - The image generator supports Hebrew text rendering natively
       
-      OUTPUT: Only the new English prompt with embedded Hebrew text, nothing else.
+      OUTPUT: Only the complete updated English prompt with embedded Hebrew text, nothing else.
     `;
 
-    let newPrompt = concept.imageGenerationPrompt;
+    let newPrompt = currentPrompt;
     try {
       const response = await ai.models.generateContent({
         model: TEXT_MODEL,
         contents: { parts: [{ text: rewritePrompt }] }
       });
-      if (response.text) newPrompt = response.text.trim();
+      if (response.text) {
+        newPrompt = response.text.trim();
+        // Remove markdown code blocks if present
+        newPrompt = newPrompt.replace(/^```[\s\S]*?\n/, '').replace(/\n```$/, '');
+      }
     } catch (e) {
-      // Fallback: manually add Hebrew text to original prompt
-      newPrompt = `${concept.imageGenerationPrompt}. Updated with Hebrew headline '${edits.newHeadline}' prominently displayed. ${edits.userInstructions}`;
+      console.error("Prompt rewrite failed:", e);
+      // Fallback: append changes to current prompt
+      newPrompt = `${currentPrompt}. Updated with Hebrew headline '${edits.newHeadline}' prominently displayed. ${edits.userInstructions || ''}`.trim();
     }
 
     // Determine aspect ratio
@@ -102,6 +119,8 @@ export default async function handler(
 
     const imageSize = edits.imageSize === "4K" ? "2K" : "1K";
     const timeout = edits.imageSize === "4K" ? 180000 : 120000;
+
+    console.log("Generating image with updated prompt:", newPrompt.substring(0, 200) + "...");
 
     // Use generateContent with IMAGE response modality for Gemini 3 Pro Image (Nano Banana Pro)
     const imgResponse = await callWithTimeout(
@@ -140,7 +159,11 @@ export default async function handler(
       throw new Error("Failed to generate image");
     }
 
-    return res.status(200).json({ imageUrl });
+    // Return both the image URL and the updated prompt for sequential edits
+    return res.status(200).json({ 
+      imageUrl,
+      updatedPrompt: newPrompt
+    });
 
   } catch (error: any) {
     console.error('Update image error:', error);
