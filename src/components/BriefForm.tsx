@@ -141,9 +141,9 @@ const BriefForm: React.FC<BriefFormProps> = ({ onSubmit, isSubmitting }) => {
   const fieldLabels: Record<string, { label: string; emoji: string }> = {
     targetAudience: { label: 'למי זה מיועד', emoji: '👥' },
     goal: { label: 'מה המטרה של הפוסט', emoji: '🎯' },
-    differentiation: { label: 'מה מייחד אותך', emoji: '⭐' },
-    callToAction: { label: 'מה אתה רוצה שיעשו', emoji: '👆' },
-    coreMessage: { label: 'מה הדבר הכי חשוב שתרצה להעביר', emoji: '💬' }
+    differentiation: { label: 'מה מייחד את העסק', emoji: '⭐' },
+    callToAction: { label: 'הפעולה הרצויה', emoji: '👆' },
+    coreMessage: { label: 'המסר המרכזי', emoji: '💬' }
   };
 
   const MagicWandButton = ({ field, label }: { field: keyof DesignBrief, label: string }) => {
@@ -229,10 +229,10 @@ const BriefForm: React.FC<BriefFormProps> = ({ onSubmit, isSubmitting }) => {
             </div>
             
             <div className="grid grid-cols-1 gap-8">
-              {/* Subject Field - Updated Label */}
+              {/* Subject Field - Gender-inclusive */}
               <div>
                 <label className={labelClasses}>
-                  מה אתה רוצה ליצור? ✨ <span className="text-fuchsia-500">*</span>
+                  מה תרצה ליצור? ✨ <span className="text-fuchsia-500">*</span>
                 </label>
                 <input 
                   type="text" 
@@ -243,13 +243,13 @@ const BriefForm: React.FC<BriefFormProps> = ({ onSubmit, isSubmitting }) => {
                   className={inputClasses} 
                   placeholder="פוסט לאינסטגרם | סטורי לטיקטוק | כרטיס ביקור | פלייר..." 
                 />
-                <p className="text-xs text-slate-500 mt-2">💡 טיפ: תאר בקצרה - למשל ״פוסט לסייל חורף בחנות בגדים״</p>
+                <p className="text-xs text-slate-500 mt-2">💡 טיפ: תיאור קצר - למשל ״פוסט לסייל חורף בחנות בגדים״</p>
               </div>
 
-              {/* Instructions Field - Updated Label */}
+              {/* Instructions Field - Gender-inclusive */}
               <div>
                 <label className={labelClasses}>
-                  איך תרצה שזה ייראה? 🎨 <span className="text-fuchsia-500">*</span>
+                  איך זה ייראה? 🎨 <span className="text-fuchsia-500">*</span>
                 </label>
                 <textarea 
                   name="instructions" 
@@ -257,7 +257,7 @@ const BriefForm: React.FC<BriefFormProps> = ({ onSubmit, isSubmitting }) => {
                   value={formData.instructions} 
                   onChange={handleInputChange} 
                   className={`${inputClasses} h-32`} 
-                  placeholder="תאר את הסגנון, הצבעים, והאווירה שאתה מדמיין..." 
+                  placeholder="תיאור הסגנון, הצבעים והאווירה הרצויים..." 
                 />
                 <div className="mt-2">
                   <p className="text-xs text-slate-500 mb-2">סגנונות מוכנים:</p>
@@ -276,7 +276,7 @@ const BriefForm: React.FC<BriefFormProps> = ({ onSubmit, isSubmitting }) => {
             
             <div className="bg-slate-900/30 p-6 rounded-2xl border border-dashed border-white/10 hover:border-fuchsia-500/30 transition-all group">
                <div className="text-center mb-4">
-                  <h3 className="text-lg font-bold text-white mb-1">יש לך דוגמה שאהבת? 🎯</h3>
+                  <h3 className="text-lg font-bold text-white mb-1">יש דוגמה שמצאה חן? 🎯</h3>
                   <p className="text-sm text-slate-400">העלה אותה וה-AI יתייחס אליה</p>
                </div>
                
@@ -302,7 +302,7 @@ const BriefForm: React.FC<BriefFormProps> = ({ onSubmit, isSubmitting }) => {
                               </div>
                               <input 
                                  type="text"
-                                 placeholder="מה אהבת בתמונה הזו?"
+                                 placeholder="מה מוצא חן בתמונה?"
                                  className="w-full bg-transparent border-none p-0 text-xs text-slate-400 placeholder-slate-600 focus:ring-0"
                                  value={file.userInstruction}
                                  onChange={(e) => updateAttachmentInstruction(file.id, e.target.value)}
@@ -333,7 +333,7 @@ const BriefForm: React.FC<BriefFormProps> = ({ onSubmit, isSubmitting }) => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-               {/* Essential Info Field - Updated Label */}
+               {/* Essential Info Field - Gender-inclusive */}
                <div className="col-span-1 md:col-span-2">
                 <label className={labelClasses}>מה לכתוב על העיצוב? 📝 (רשות)</label>
                 <textarea 
@@ -341,11 +341,11 @@ const BriefForm: React.FC<BriefFormProps> = ({ onSubmit, isSubmitting }) => {
                   value={formData.essentialInfo} 
                   onChange={handleInputChange} 
                   className={`${inputClasses} h-28`} 
-                  placeholder="הכותרת, המחיר, פרטי יצירת קשר, או כל טקסט שתרצה שיופיע" 
+                  placeholder="הכותרת, המחיר, פרטי יצירת קשר, או כל טקסט נוסף" 
                 />
               </div>
 
-              {/* Target Audience - Updated */}
+              {/* Target Audience - Gender-inclusive */}
               <div>
                 <div className="flex justify-between items-center mb-2 flex-wrap gap-2">
                   <label className={labelClasses}>
@@ -359,12 +359,12 @@ const BriefForm: React.FC<BriefFormProps> = ({ onSubmit, isSubmitting }) => {
                   value={formData.targetAudience} 
                   onChange={handleInputChange} 
                   className={inputClasses} 
-                  placeholder="למי אתה רוצה למכור? נשים, גברים, גיל מסוים?"
+                  placeholder="קהל היעד - נשים, גברים, גיל מסוים?"
                 />
                 <QuickSelectButtons options={audienceOptions} field="targetAudience" />
               </div>
 
-              {/* Goal - Updated */}
+              {/* Goal - Gender-inclusive */}
               <div>
                 <div className="flex justify-between items-center mb-2 flex-wrap gap-2">
                   <label className={labelClasses}>
@@ -378,12 +378,12 @@ const BriefForm: React.FC<BriefFormProps> = ({ onSubmit, isSubmitting }) => {
                   value={formData.goal} 
                   onChange={handleInputChange} 
                   className={inputClasses}
-                  placeholder="מה אתה רוצה להשיג?"
+                  placeholder="המטרה העסקית של העיצוב"
                 />
                 <QuickSelectButtons options={goalOptions} field="goal" />
               </div>
 
-              {/* Call to Action - Updated */}
+              {/* Call to Action - Gender-inclusive */}
               <div>
                 <div className="flex justify-between items-center mb-2 flex-wrap gap-2">
                   <label className={labelClasses}>
@@ -397,12 +397,12 @@ const BriefForm: React.FC<BriefFormProps> = ({ onSubmit, isSubmitting }) => {
                   value={formData.callToAction} 
                   onChange={handleInputChange} 
                   className={inputClasses}
-                  placeholder="לחצו כאן? התקשרו? בקרו?"
+                  placeholder="הפעולה שהלקוח יבצע - התקשרו, קנו, בקרו..."
                 />
                 <QuickSelectButtons options={ctaOptions} field="callToAction" />
               </div>
 
-              {/* Core Message - Updated */}
+              {/* Core Message - Gender-inclusive */}
               <div>
                 <div className="flex justify-between items-center mb-2 flex-wrap gap-2">
                   <label className={labelClasses}>
@@ -415,7 +415,7 @@ const BriefForm: React.FC<BriefFormProps> = ({ onSubmit, isSubmitting }) => {
                   value={formData.coreMessage} 
                   onChange={handleInputChange} 
                   className={`${inputClasses} h-24`}
-                  placeholder="המשפט או הרעיון המרכזי של הפוסט"
+                  placeholder="המשפט או הרעיון המרכזי של העיצוב"
                 />
               </div>
 
@@ -431,7 +431,7 @@ const BriefForm: React.FC<BriefFormProps> = ({ onSubmit, isSubmitting }) => {
                 </button>
               </div>
 
-              {/* Differentiation - Hidden by default */}
+              {/* Differentiation - Hidden by default, Gender-inclusive */}
               {showAdvanced && (
                 <div className="col-span-1 md:col-span-2">
                   <div className="flex justify-between items-center mb-2 flex-wrap gap-2">
@@ -446,20 +446,20 @@ const BriefForm: React.FC<BriefFormProps> = ({ onSubmit, isSubmitting }) => {
                     value={formData.differentiation} 
                     onChange={handleInputChange} 
                     className={inputClasses}
-                    placeholder="מה עושה אותך שונה מהמתחרים?"
+                    placeholder="מה מייחד את העסק/מוצר מהמתחרים?"
                   />
                 </div>
               )}
             </div>
           </section>
 
-          {/* Step 4: Format Selection - Updated */}
+          {/* Step 4: Format Selection - Gender-inclusive */}
           <section>
             <div className="flex items-center gap-5 mb-8">
                <StepIndicator num="04" />
                <h2 className={sectionHeaderClasses}>איפה זה יפורסם? 📱</h2>
             </div>
-            <p className="text-slate-400 text-sm mb-6">בחר את הגודל המתאים לפלטפורמה שלך:</p>
+            <p className="text-slate-400 text-sm mb-6">בחירת הגודל המתאים לפלטפורמה:</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {platformOptions.map(platform => (
                 <button
