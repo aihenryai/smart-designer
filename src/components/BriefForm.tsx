@@ -130,10 +130,10 @@ const BriefForm: React.FC<BriefFormProps> = ({ onSubmit, isSubmitting }) => {
   };
 
   const platformOptions = [
-    { label: "פוסט", sublabel: "אינסטגרם, פייסבוק", value: "Post 1:1", icon: "📱" },
-    { label: "סטורי", sublabel: "טיקטוק, רילס", value: "Story 9:16", icon: "📲" },
-    { label: "פוסטר", sublabel: "להדפסה, פלייר", value: "Poster 3:4", icon: "🖼️" },
-    { label: "מצגת", sublabel: "מסך רחב", value: "Screen 16:9", icon: "🖥️" }
+    { label: "פוסט", shape: "ריבוע • 1:1", sublabel: "אינסטגרם, פייסבוק", value: "Post 1:1", icon: "📱" },
+    { label: "סטורי", shape: "מלבן עומד • 9:16", sublabel: "טיקטוק, רילס", value: "Story 9:16", icon: "📲" },
+    { label: "פוסטר", shape: "מלבן • 3:4", sublabel: "להדפסה, פלייר", value: "Poster 3:4", icon: "🖼️" },
+    { label: "מסך מחשב", shape: "מלבן רחב • 16:9", sublabel: "מצגות, מסך רחב", value: "Screen 16:9", icon: "🖥️" }
   ];
 
   const canUseAutoFill = !!(formData.subject && formData.instructions);
@@ -142,7 +142,7 @@ const BriefForm: React.FC<BriefFormProps> = ({ onSubmit, isSubmitting }) => {
     targetAudience: { label: 'למי זה מיועד', emoji: '👥' },
     goal: { label: 'מה המטרה של הפוסט', emoji: '🎯' },
     differentiation: { label: 'מה מייחד את העסק', emoji: '⭐' },
-    callToAction: { label: 'הפעולה הרצויה', emoji: '👆' },
+    callToAction: { label: 'קריאה לפעולה', emoji: '👆' },
     coreMessage: { label: 'המסר המרכזי', emoji: '💬' }
   };
 
@@ -427,7 +427,7 @@ const BriefForm: React.FC<BriefFormProps> = ({ onSubmit, isSubmitting }) => {
                 <QuickSelectButtons options={goalOptions} field="goal" />
               </div>
 
-              {/* Call to Action - Gender-inclusive */}
+              {/* Call to Action - UPDATED */}
               <div>
                 <div className="flex justify-between items-center mb-2 flex-wrap gap-2">
                   <label className={labelClasses}>
@@ -441,7 +441,7 @@ const BriefForm: React.FC<BriefFormProps> = ({ onSubmit, isSubmitting }) => {
                   value={formData.callToAction} 
                   onChange={handleInputChange} 
                   className={inputClasses}
-                  placeholder="הפעולה שהלקוח יבצע - התקשרו, קנו, בקרו..."
+                  placeholder="התקשרו, קנו, בקרו..."
                 />
                 <QuickSelectButtons options={ctaOptions} field="callToAction" />
               </div>
@@ -463,15 +463,16 @@ const BriefForm: React.FC<BriefFormProps> = ({ onSubmit, isSubmitting }) => {
                 />
               </div>
 
-              {/* Advanced Settings Toggle */}
+              {/* Advanced Settings Toggle - ENHANCED */}
               <div className="col-span-1 md:col-span-2">
                 <button
                   type="button"
                   onClick={() => setShowAdvanced(!showAdvanced)}
-                  className="text-sm text-slate-400 hover:text-fuchsia-400 transition-colors flex items-center gap-2"
+                  className="text-sm font-bold text-slate-300 hover:text-fuchsia-400 transition-all flex items-center gap-3 bg-slate-800/30 hover:bg-slate-800/50 px-4 py-3 rounded-lg border border-white/10 hover:border-fuchsia-500/30"
                 >
-                  <span>{showAdvanced ? '▼' : '◀'}</span>
-                  <span>הגדרות מתקדמות (למשתמשים מנוסים)</span>
+                  <span className="text-lg">{showAdvanced ? '▼' : '◀'}</span>
+                  <span>הגדרות מתקדמות</span>
+                  <span className="text-xs text-slate-500 font-normal">(למשתמשים מנוסים)</span>
                 </button>
               </div>
 
@@ -497,7 +498,7 @@ const BriefForm: React.FC<BriefFormProps> = ({ onSubmit, isSubmitting }) => {
             </div>
           </section>
 
-          {/* Step 4: Format Selection - Gender-inclusive */}
+          {/* Step 4: Format Selection - ENHANCED WITH SHAPES */}
           <section>
             <div className="flex items-center gap-5 mb-8">
                <StepIndicator num="04" />
@@ -518,6 +519,7 @@ const BriefForm: React.FC<BriefFormProps> = ({ onSubmit, isSubmitting }) => {
                 >
                   <div className="text-4xl mb-2">{platform.icon}</div>
                   <div className="font-bold text-lg mb-1 group-hover:text-white transition-colors">{platform.label}</div>
+                  <div className="text-xs text-fuchsia-300 font-semibold mb-1">{platform.shape}</div>
                   <div className="text-xs text-slate-500">{platform.sublabel}</div>
                   {formData.platforms.includes(platform.value) && (
                      <div className="mt-3 w-3 h-3 mx-auto rounded-full bg-gradient-to-r from-violet-500 to-fuchsia-500 shadow-glow"></div>
