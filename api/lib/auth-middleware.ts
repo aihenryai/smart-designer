@@ -9,7 +9,7 @@ export interface AuthenticatedRequest extends VercelRequest {
 
 // Dynamic import helper
 async function getFirebaseAdmin() {
-  return await import('./firebase-admin');
+  return await import('./firebase-admin.js');
 }
 
 /**
