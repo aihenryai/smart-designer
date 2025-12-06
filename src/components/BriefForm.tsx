@@ -1,6 +1,6 @@
 import React, { useState, ChangeEvent } from 'react';
 import { DesignBrief, ReferenceAttachment } from '../../types';
-import { generateAutoFillSuggestion } from '../services/gemini';
+import { generateAutoFillSuggestion } from '../services/api';
 import { fileToBase64 } from '../../utils';
 
 interface BriefFormProps {
