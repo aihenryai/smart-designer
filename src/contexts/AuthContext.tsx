@@ -12,13 +12,16 @@ import { initializeUserCredits, getUserCredits, UserCredits } from '../services/
 
 interface AuthContextType {
   user: User | null;
+  currentUser: User | null; // Alias for compatibility
   userCredits: UserCredits | null;
+  userData: UserCredits | null; // Alias for compatibility
   loading: boolean;
   signInWithGoogle: () => Promise<void>;
   signInWithEmail: (email: string, password: string) => Promise<void>;
   signUpWithEmail: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   refreshCredits: () => Promise<void>;
+  refreshUser: () => Promise<void>; // Alias for refreshCredits
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -139,13 +142,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const value: AuthContextType = {
     user,
+    currentUser: user, // Alias
     userCredits,
+    userData: userCredits, // Alias
     loading,
     signInWithGoogle,
     signInWithEmail,
     signUpWithEmail,
     signOut,
-    refreshCredits
+    refreshCredits,
+    refreshUser: refreshCredits // Alias
   };
 
   return (
