@@ -12,6 +12,11 @@ async function getFirebaseAdmin() {
   return await import('./firebase-admin.js');
 }
 
+// Admin emails with unlimited access
+const UNLIMITED_ACCESS_EMAILS = [
+  'henrystauber22@gmail.com'
+];
+
 /**
  * Middleware to verify Firebase ID token and attach user to request
  */
@@ -40,21 +45,26 @@ export async function verifyAuth(req: AuthenticatedRequest): Promise<{ uid: stri
 /**
  * Check if user has available credits
  */
-export async function checkCredits(uid: string): Promise<{ hasCredits: boolean; remaining: number; plan: string }> {
+export async function checkCredits(uid: string, email?: string): Promise<{ hasCredits: boolean; remaining: number; plan: string }> {
   try {
     const { getAdminDb } = await getFirebaseAdmin();
     const db = await getAdminDb();
     const userRef = db.collection('users').doc(uid);
     const userDoc = await userRef.get();
 
+    // Check if user email has unlimited access
+    const isUnlimitedUser = email && UNLIMITED_ACCESS_EMAILS.includes(email.toLowerCase());
+
     if (!userDoc.exists) {
       // Initialize user if doesn't exist
+      const plan = isUnlimitedUser ? 'premium' : 'free';
       await userRef.set({
         uid,
-        plan: 'free',
+        email,
+        plan,
         credits: {
           used: 0,
-          limit: 3,
+          limit: isUnlimitedUser ? -1 : 3,
           resetDate: null
         },
         createdAt: new Date(),
@@ -63,13 +73,23 @@ export async function checkCredits(uid: string): Promise<{ hasCredits: boolean; 
 
       return {
         hasCredits: true,
-        remaining: 3,
-        plan: 'free'
+        remaining: isUnlimitedUser ? -1 : 3,
+        plan
       };
     }
 
     const userData = userDoc.data();
-    const plan = userData?.plan || 'free';
+    let plan = userData?.plan || 'free';
+
+    // Auto-upgrade unlimited access users to premium
+    if (isUnlimitedUser && plan !== 'premium') {
+      await userRef.update({
+        plan: 'premium',
+        'credits.limit': -1,
+        updatedAt: new Date()
+      });
+      plan = 'premium';
+    }
 
     // Premium users have unlimited credits
     if (plan === 'premium') {
