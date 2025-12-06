@@ -138,15 +138,16 @@ const BriefForm: React.FC<BriefFormProps> = ({ onSubmit, isSubmitting }) => {
 
   const canUseAutoFill = !!(formData.subject && formData.instructions);
 
-  const fieldLabels: Record<string, { label: string; emoji: string }> = {
-    targetAudience: { label: 'למי זה מיועד', emoji: '👥' },
-    goal: { label: 'מה המטרה של הפוסט', emoji: '🎯' },
-    differentiation: { label: 'מה מייחד את העסק', emoji: '⭐' },
-    callToAction: { label: 'קריאה לפעולה', emoji: '👆' },
-    coreMessage: { label: 'המסר המרכזי', emoji: '💬' }
+  // FIXED: Added buttonText field for proper grammar in AI buttons
+  const fieldLabels: Record<string, { label: string; emoji: string; buttonText: string }> = {
+    targetAudience: { label: 'למי זה מיועד', emoji: '👥', buttonText: 'קהל יעד' },
+    goal: { label: 'מה המטרה של הפוסט', emoji: '🎯', buttonText: 'מטרת הפוסט' },
+    differentiation: { label: 'מה מייחד את העסק', emoji: '⭐', buttonText: 'ייחוד העסק' },
+    callToAction: { label: 'קריאה לפעולה', emoji: '👆', buttonText: 'קריאה לפעולה' },
+    coreMessage: { label: 'המסר המרכזי', emoji: '💬', buttonText: 'מסר מרכזי' }
   };
 
-  const MagicWandButton = ({ field, label }: { field: keyof DesignBrief, label: string }) => {
+  const MagicWandButton = ({ field, label, buttonText }: { field: keyof DesignBrief, label: string, buttonText: string }) => {
     const isLoading = loadingField === field;
     
     return (
@@ -172,7 +173,7 @@ const BriefForm: React.FC<BriefFormProps> = ({ onSubmit, isSubmitting }) => {
         ) : (
           <>
             <span className="text-sm bg-clip-text text-transparent bg-gradient-to-r from-violet-400 to-fuchsia-400">✨</span>
-            <span>הצעת AI ל{label}</span>
+            <span>הצעת AI ל{buttonText}</span>
           </>
         )}
       </button>
@@ -216,7 +217,7 @@ const BriefForm: React.FC<BriefFormProps> = ({ onSubmit, isSubmitting }) => {
             יצירת עיצוב חדש
           </h1>
           <p className="text-slate-400 font-light text-lg">
-            הזן את פרטי הבריף ו-<span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-fuchsia-400 font-medium">Smart Studio</span> ייצר עבורך סקיצות מרהיבות.
+            הזן את פרטי הבריף ו-<span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-fuchsia-400 font-medium">Smart Studio</span> ייצור עבורך סקיצות מרהיבות.
           </p>
         </div>
 
@@ -395,7 +396,7 @@ const BriefForm: React.FC<BriefFormProps> = ({ onSubmit, isSubmitting }) => {
                   <label className={labelClasses}>
                     {fieldLabels.targetAudience.emoji} {fieldLabels.targetAudience.label}
                   </label>
-                  <MagicWandButton field="targetAudience" label={fieldLabels.targetAudience.label} />
+                  <MagicWandButton field="targetAudience" label={fieldLabels.targetAudience.label} buttonText={fieldLabels.targetAudience.buttonText} />
                 </div>
                 <input 
                   type="text" 
@@ -414,7 +415,7 @@ const BriefForm: React.FC<BriefFormProps> = ({ onSubmit, isSubmitting }) => {
                   <label className={labelClasses}>
                     {fieldLabels.goal.emoji} {fieldLabels.goal.label}
                   </label>
-                  <MagicWandButton field="goal" label={fieldLabels.goal.label} />
+                  <MagicWandButton field="goal" label={fieldLabels.goal.label} buttonText={fieldLabels.goal.buttonText} />
                 </div>
                 <input 
                   type="text" 
@@ -433,7 +434,7 @@ const BriefForm: React.FC<BriefFormProps> = ({ onSubmit, isSubmitting }) => {
                   <label className={labelClasses}>
                     {fieldLabels.callToAction.emoji} {fieldLabels.callToAction.label}
                   </label>
-                  <MagicWandButton field="callToAction" label={fieldLabels.callToAction.label} />
+                  <MagicWandButton field="callToAction" label={fieldLabels.callToAction.label} buttonText={fieldLabels.callToAction.buttonText} />
                 </div>
                 <input 
                   type="text" 
@@ -446,13 +447,13 @@ const BriefForm: React.FC<BriefFormProps> = ({ onSubmit, isSubmitting }) => {
                 <QuickSelectButtons options={ctaOptions} field="callToAction" />
               </div>
 
-              {/* Core Message - Gender-inclusive */}
+              {/* Core Message - Gender-inclusive - FIXED BUTTON TEXT */}
               <div>
                 <div className="flex justify-between items-center mb-2 flex-wrap gap-2">
                   <label className={labelClasses}>
                     {fieldLabels.coreMessage.emoji} {fieldLabels.coreMessage.label}
                   </label>
-                  <MagicWandButton field="coreMessage" label={fieldLabels.coreMessage.label} />
+                  <MagicWandButton field="coreMessage" label={fieldLabels.coreMessage.label} buttonText={fieldLabels.coreMessage.buttonText} />
                 </div>
                 <textarea 
                   name="coreMessage" 
@@ -483,7 +484,7 @@ const BriefForm: React.FC<BriefFormProps> = ({ onSubmit, isSubmitting }) => {
                     <label className={labelClasses}>
                       {fieldLabels.differentiation.emoji} {fieldLabels.differentiation.label}
                     </label>
-                    <MagicWandButton field="differentiation" label={fieldLabels.differentiation.label} />
+                    <MagicWandButton field="differentiation" label={fieldLabels.differentiation.label} buttonText={fieldLabels.differentiation.buttonText} />
                   </div>
                   <input 
                     type="text" 
