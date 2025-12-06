@@ -97,7 +97,7 @@ const BriefForm: React.FC<BriefFormProps> = ({ onSubmit, isSubmitting }) => {
           console.error("File read failed", err);
         }
       }
-      setFormData(prev => ({ ...prev, attachments: [...prev.attachments, ...newAttachments] }));
+      setFormData(prev => ({ ...prev, attachments: [...newAttachments, ...prev.attachments] }));
     }
   };
 
@@ -112,13 +112,15 @@ const BriefForm: React.FC<BriefFormProps> = ({ onSubmit, isSubmitting }) => {
     }));
   };
 
-  // FIXED: Animation persists until response is received AND field is updated
+  // IMPROVED: Animation persists throughout entire AI generation + smooth transition
   const handleAutoFill = async (field: keyof DesignBrief) => {
     if (!formData.subject || !formData.instructions) return;
     
+    // Start loading animation - this will persist until we're completely done
     setLoadingField(field);
     
     try {
+      // Wait for AI to generate suggestion (this is where the real time is spent)
       const suggestion = await generateAutoFillSuggestion(field, {
         subject: formData.subject,
         instructions: formData.instructions,
@@ -129,14 +131,16 @@ const BriefForm: React.FC<BriefFormProps> = ({ onSubmit, isSubmitting }) => {
         // Update the field with the suggestion
         setFormData(prev => ({ ...prev, [field]: suggestion }));
         
-        // Small delay to ensure the user sees the text populate
-        // This creates a smooth transition from loading to content
-        await new Promise(resolve => setTimeout(resolve, 300));
+        // Keep animation for a brief moment to ensure smooth visual transition
+        // This prevents the jarring effect of animation stopping immediately when text appears
+        await new Promise(resolve => setTimeout(resolve, 400));
       }
     } catch (error) {
       console.error('Failed to get AI suggestion:', error);
+      // Show error state for 2 seconds before clearing
+      await new Promise(resolve => setTimeout(resolve, 2000));
     } finally {
-      // Only remove loading state after we got the response AND updated the field
+      // Clear loading state only after everything is complete
       setLoadingField(null);
     }
   };
