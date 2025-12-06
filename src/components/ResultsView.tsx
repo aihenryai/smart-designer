@@ -24,9 +24,9 @@ const ResultsView: React.FC<ResultsViewProps> = ({ concepts, originalBrief, onRe
     <div className="max-w-7xl mx-auto p-4">
       <div className="flex flex-col md:flex-row justify-between items-end mb-12 border-b border-white/10 pb-8 gap-6">
         <div>
-          <h1 className="text-4xl font-bold text-white mb-2 tracking-tight">תוצרים</h1>
+          <h1 className="text-4xl font-bold text-white mb-2 tracking-tight">תוצאות</h1>
           <p className="text-slate-400 text-base max-w-xl font-light">
-            הנה 4 כיוונים קריאייטיביים שנבנו ב-<span className="text-fuchsia-400 font-medium">Smart Studio</span> עבור <span className="text-white font-medium border-b border-fuchsia-500/30">{originalBrief.subject}</span>
+            הנה 4 כיוונים יצירתיים שנבנו ב-<span className="text-fuchsia-400 font-medium">Smart Studio</span> עבור <span className="text-white font-medium border-b border-fuchsia-500/30">{originalBrief.subject}</span>
           </p>
         </div>
         <button 
@@ -42,7 +42,7 @@ const ResultsView: React.FC<ResultsViewProps> = ({ concepts, originalBrief, onRe
           <div key={index} className="group flex flex-col h-full bg-slate-900/40 hover:bg-slate-900/60 border border-white/5 hover:border-fuchsia-500/30 rounded-3xl overflow-hidden transition-all duration-300 hover:shadow-2xl hover:shadow-violet-900/20 backdrop-blur-sm">
             
             <div className="px-6 py-5 flex justify-between items-center border-b border-white/5 bg-white/[0.02]">
-               <span className="text-xs font-bold text-fuchsia-400 uppercase tracking-widest">Concept {index + 1}</span>
+               <span className="text-xs font-bold text-fuchsia-400 uppercase tracking-widest">כיוון {index + 1}</span>
                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-slate-800 to-slate-900 border border-white/10 flex items-center justify-center text-xs font-bold text-white shadow-inner">
                  {index + 1}
                </div>
@@ -71,7 +71,7 @@ const ResultsView: React.FC<ResultsViewProps> = ({ concepts, originalBrief, onRe
                             onClick={(e) => e.stopPropagation()}
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M12 12.75l7.5-7.5 7.5 7.5M12 3v18" />
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12M12 16.5V3" />
                             </svg>
                             הורדה מהירה
                         </a>
@@ -93,11 +93,11 @@ const ResultsView: React.FC<ResultsViewProps> = ({ concepts, originalBrief, onRe
               
               <div className="mt-auto pt-6 border-t border-white/5 flex flex-col gap-3">
                  <div className="flex gap-3 items-start bg-black/20 p-3 rounded-lg border border-white/5">
-                    <span className="text-[10px] uppercase text-fuchsia-400 font-bold mt-1 min-w-[50px]">Copy</span>
+                    <span className="text-[10px] uppercase text-fuchsia-400 font-bold mt-1 min-w-[60px]">כותרת</span>
                     <p className="text-sm text-slate-200 font-medium italic">"{concept.headline}"</p>
                  </div>
                  <div className="flex gap-3 items-center">
-                    <span className="text-[10px] uppercase text-violet-400 font-bold min-w-[50px]">Mood</span>
+                    <span className="text-[10px] uppercase text-violet-400 font-bold min-w-[60px]">אווירה</span>
                     <p className="text-xs text-slate-400 bg-white/5 px-2 py-1 rounded border border-white/5">{concept.colorPaletteSuggestion}</p>
                  </div>
               </div>
