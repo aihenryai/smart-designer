@@ -83,13 +83,18 @@ export default async function handler(
       
       Requirements:
       1. Language: All output fields (title, visualDescription, headline, colorPaletteSuggestion, rationale) MUST be in Hebrew.
-      2. EXCEPTION: 'imageGenerationPrompt' MUST be in English for the image generator.
-      3. TEXT RENDERING: The visual design concept should describe where text would appear.
+      2. EXCEPTION: 'imageGenerationPrompt' structure MUST be in English for the image generator.
+      3. CRITICAL - HEBREW TEXT IN DESIGN: 
+         - The visual design MUST include text in HEBREW (עברית).
+         - In 'imageGenerationPrompt', write in English but INCLUDE the actual Hebrew headline/text that should appear in the design.
+         - Example: "Modern poster design with bold Hebrew text 'כותרת ראשית' at the center..."
+         - The image generator supports Hebrew text rendering - use it!
       4. STYLE: Modern, Trendy, Commercial, Clean, High-End.
       5. IN THE 'imageGenerationPrompt': 
          - Write a detailed English description of the visual design.
+         - INCLUDE the exact Hebrew text from 'headline' field in the prompt.
+         - Specify text placement, size, and styling.
          - Include details on Lighting, Composition, Colors, and Style.
-         - Do NOT include Hebrew text in the prompt - describe the layout only.
       
       Structure the response as a JSON array of 4 concepts.
     `;
@@ -104,7 +109,7 @@ export default async function handler(
           headline: { type: Type.STRING, description: "Main Copy/Headline (Hebrew)" },
           colorPaletteSuggestion: { type: Type.STRING, description: "Color palette and mood (Hebrew)" },
           rationale: { type: Type.STRING, description: "Why this works for the brief (Hebrew)" },
-          imageGenerationPrompt: { type: Type.STRING, description: "Detailed English prompt for image generation - describe visual elements, colors, composition, lighting, style. No Hebrew text." }
+          imageGenerationPrompt: { type: Type.STRING, description: "Detailed English prompt for image generation. MUST include the actual Hebrew headline text from the 'headline' field. Describe visual elements, colors, composition, lighting, style, and specify exactly where and how the Hebrew text should appear." }
         },
         required: ["title", "headline", "imageGenerationPrompt", "rationale", "visualDescription", "colorPaletteSuggestion"]
       }
