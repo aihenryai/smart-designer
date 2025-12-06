@@ -62,8 +62,8 @@ export default async function handler(
 
     const ai = new GoogleGenAI({ apiKey: API_KEY });
     const TEXT_MODEL = "gemini-2.5-flash";
-    // Use Gemini 3 Pro Image Preview for proper Hebrew text rendering
-    const IMAGE_MODEL = "gemini-3-pro-image-preview";
+    // Use Gemini 2.5 Flash Image for proper Hebrew text rendering
+    const IMAGE_MODEL = "gemini-2.5-flash-image";
 
     const attachmentsInfo = (brief.attachments || []).map((att: any, idx: number) => 
       `Attachment ${idx + 1} (${att.fileName}): ${att.userInstruction}`
@@ -147,26 +147,34 @@ export default async function handler(
     const conceptsWithImages = await Promise.all(
       textConcepts.map(async (concept: any) => {
         try {
-          // Use generateImages API for Gemini image model
+          // Use generateContent with IMAGE response modality for Gemini 2.5 Flash Image
           const imgResponse = await callWithTimeout(
-            ai.models.generateImages({
+            ai.models.generateContent({
               model: IMAGE_MODEL,
-              prompt: concept.imageGenerationPrompt,
+              contents: { parts: [{ text: concept.imageGenerationPrompt }] },
               config: {
-                numberOfImages: 1,
-                outputMimeType: 'image/png',
-                aspectRatio: targetRatio,
+                responseModalities: ['IMAGE'],
+                imageConfig: {
+                  aspectRatio: targetRatio,
+                  imageSize: '1K'
+                }
               }
             }),
             180000,
             "Image generation timed out"
           );
 
-          // Extract image from response
-          if (imgResponse.generatedImages && imgResponse.generatedImages.length > 0) {
-            const imageData = imgResponse.generatedImages[0].image?.imageBytes;
-            if (imageData) {
-              concept.imageUrl = `data:image/png;base64,${imageData}`;
+          // Extract image from response - Gemini returns image in inlineData
+          if (imgResponse.candidates && imgResponse.candidates.length > 0) {
+            const parts = imgResponse.candidates[0].content.parts;
+            for (const part of parts) {
+              if (part.inlineData) {
+                const imageData = part.inlineData.data;
+                if (imageData) {
+                  concept.imageUrl = `data:image/png;base64,${imageData}`;
+                  break;
+                }
+              }
             }
           }
 
