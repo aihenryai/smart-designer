@@ -54,8 +54,8 @@ export default async function handler(
 
     const ai = new GoogleGenAI({ apiKey: API_KEY });
     const TEXT_MODEL = "gemini-2.5-flash";
-    // Use Imagen 4 for image generation
-    const IMAGE_MODEL = "imagen-4.0-fast-generate-001";
+    // Nano Banana Pro - best model for Hebrew text in images!
+    const IMAGE_MODEL = "gemini-3-pro-image-preview";
 
     // Generate improved prompt based on edits
     const rewritePrompt = `
@@ -99,7 +99,7 @@ export default async function handler(
 
     const timeout = edits.imageSize === "4K" ? 180000 : 120000;
 
-    // Use generateImages API for Imagen model
+    // Use generateImages API for Gemini image model
     const imgResponse = await callWithTimeout(
       ai.models.generateImages({
         model: IMAGE_MODEL,
