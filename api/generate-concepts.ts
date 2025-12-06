@@ -1,6 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { GoogleGenAI, Type } from "@google/genai";
-import { verifyAuth, checkCredits, useCredit, sendAuthError, sendCreditsError } from './lib/auth-middleware';
 
 async function callWithTimeout<T>(
   promise: Promise<T>,
@@ -35,6 +34,9 @@ export default async function handler(
   }
 
   try {
+    // Dynamic import for auth middleware
+    const { verifyAuth, checkCredits, useCredit, sendAuthError, sendCreditsError } = await import('./lib/auth-middleware');
+    
     // Verify authentication
     const user = await verifyAuth(req);
     if (!user) {
