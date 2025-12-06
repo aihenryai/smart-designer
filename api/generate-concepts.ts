@@ -62,8 +62,8 @@ export default async function handler(
 
     const ai = new GoogleGenAI({ apiKey: API_KEY });
     const TEXT_MODEL = "gemini-2.5-flash";
-    // Use Gemini 2.5 Flash Image for proper Hebrew text rendering
-    const IMAGE_MODEL = "gemini-2.5-flash-image";
+    // Use Gemini 3 Pro Image Preview (Nano Banana Pro) for Hebrew text rendering
+    const IMAGE_MODEL = "gemini-3-pro-image-preview";
 
     const attachmentsInfo = (brief.attachments || []).map((att: any, idx: number) => 
       `Attachment ${idx + 1} (${att.fileName}): ${att.userInstruction}`
@@ -147,7 +147,7 @@ export default async function handler(
     const conceptsWithImages = await Promise.all(
       textConcepts.map(async (concept: any) => {
         try {
-          // Use generateContent with IMAGE response modality for Gemini 2.5 Flash Image
+          // Use generateContent with IMAGE response modality for Gemini 3 Pro Image (Nano Banana Pro)
           const imgResponse = await callWithTimeout(
             ai.models.generateContent({
               model: IMAGE_MODEL,
